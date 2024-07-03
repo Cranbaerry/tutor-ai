@@ -1,3 +1,4 @@
+'use client';
 import React, { useRef, useEffect } from "react";
 import Canvas from "@/components/ui/canvas";
 import { Button } from "@/components/ui/button";
