@@ -1,6 +1,6 @@
 'use client';
 import React, { useRef, useEffect } from "react";
-import Canvas from "@/components/ui/canvas";
+import dynamic from 'next/dynamic';
 import { Button } from "@/components/ui/button";
 import { MicIndicator } from "@/components/ui/mic-indicator";
 import { CounterClockwiseClockIcon } from "@radix-ui/react-icons";
@@ -9,13 +9,16 @@ import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognitio
 import {
     AlertDialog,
     AlertDialogAction,
-    AlertDialogCancel,
     AlertDialogContent,
     AlertDialogDescription,
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+
+const Canvas = dynamic(() => import('@/components/ui/canvas'), {
+    ssr: false,
+});
 
 export default function Playground() {
     const canvasRef = useRef<any>();
@@ -26,9 +29,9 @@ export default function Playground() {
         browserSupportsSpeechRecognition,
         isMicrophoneAvailable
     } = useSpeechRecognition();
-    
+
     const startListening = () => SpeechRecognition.startListening({ continuous: true });
-    
+
     useEffect(() => {
         startListening();
     }, []);
