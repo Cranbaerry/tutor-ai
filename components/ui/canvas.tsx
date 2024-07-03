@@ -98,4 +98,5 @@ const Canvas = forwardRef((props, ref) => {
   );
 });
 
+Canvas.displayName = 'Canvas';
 export default Canvas;

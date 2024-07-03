@@ -1,11 +1,10 @@
-'use client';
-import { useRef, useEffect } from "react"
+import React, { useRef, useEffect } from "react";
 import Canvas from "@/components/ui/canvas";
-import { Button } from "@/components/ui/button"
-import { MicIndicator } from "@/components/ui/mic-indicator"
-import { CounterClockwiseClockIcon, SlashIcon } from "@radix-ui/react-icons"
+import { Button } from "@/components/ui/button";
+import { MicIndicator } from "@/components/ui/mic-indicator";
+import { CounterClockwiseClockIcon } from "@radix-ui/react-icons";
 import 'regenerator-runtime/runtime';
-import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition'
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -15,7 +14,7 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
 
 export default function Playground() {
     const canvasRef = useRef<any>();
@@ -27,11 +26,11 @@ export default function Playground() {
         isMicrophoneAvailable
     } = useSpeechRecognition();
     
-    
     const startListening = () => SpeechRecognition.startListening({ continuous: true });
+    
     useEffect(() => {
         startListening();
-      }, []);
+    }, []);
 
     return (
         <>
@@ -41,7 +40,7 @@ export default function Playground() {
                         <AlertDialogHeader>
                             <AlertDialogTitle>Browser not supported</AlertDialogTitle>
                             <AlertDialogDescription>
-                                Your browser browser doesn't support speech recognition. For a smooth experience, please try using the latest version of Google Chrome or Microsoft Edge.
+                                Your browser doesn&apos;t support speech recognition. For a smooth experience, please try using the latest version of Google Chrome or Microsoft Edge.
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -74,7 +73,6 @@ export default function Playground() {
                     if (!canvas) return;
                     const data = canvas.handleExport();
                     console.log(data);
-                    //startListening();
                 }}>Submit</Button>
                 <Button variant="secondary">
                     <span className="sr-only">Show history</span>
@@ -84,4 +82,4 @@ export default function Playground() {
             </div>
         </>
     );
-};
+}
