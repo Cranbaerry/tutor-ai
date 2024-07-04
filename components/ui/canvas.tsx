@@ -1,18 +1,10 @@
-'use client';
-import { Stage, Layer, Line, Text } from 'react-konva';
-import React, { useEffect, useRef, useState, forwardRef, useImperativeHandle } from "react";
+import { Stage, Layer, Line } from 'react-konva';
+import React, { useEffect, useRef, useState, useImperativeHandle } from "react";
 import { KonvaEventObject } from 'konva/lib/Node';
+import { CanvasProps, LineData } from '@/lib/definitions';
 import Konva from 'konva';
 
-interface LineData {
-  tool: string;
-  points: number[];
-}
-
-const Canvas = forwardRef((props, ref) => {
-  useImperativeHandle(ref, () => ({
-    handleExport: () => handleExport(),
-  }));
+function Canvas(props: CanvasProps) {
   const divRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
   const [tool, setTool] = useState<string>('pen');
@@ -22,6 +14,18 @@ const Canvas = forwardRef((props, ref) => {
     width: 0,
     height: 0
   });
+
+  useImperativeHandle(props.canvasRef, () => ({
+    handleExport: () => handleExport(),
+  }));
+
+  const handleExport = () => {
+    if (stageRef.current) {
+      const uri = stageRef.current.toDataURL();
+      return uri;
+    }
+    return '';
+  };
 
   const handleMouseDown = (e: KonvaEventObject<MouseEvent>) => {
     isDrawing.current = true;
@@ -48,14 +52,6 @@ const Canvas = forwardRef((props, ref) => {
     isDrawing.current = false;
   };
 
-  const handleExport = () => {
-    if (stageRef.current) {
-      const uri = stageRef.current.toDataURL();
-      return uri;
-    }
-    return '';
-  };
-
   useEffect(() => {
     if (divRef.current) {
       setDimensions({
@@ -72,7 +68,7 @@ const Canvas = forwardRef((props, ref) => {
         width={dimensions.width}
         height={dimensions.height}
         draggable={false}
-        style={{ backgroundColor: 'red' }}
+        style={{ backgroundColor: props.backgroundColor }}
         onMouseDown={handleMouseDown}
         onMousemove={handleMouseMove}
         onMouseup={handleMouseUp}
@@ -96,7 +92,6 @@ const Canvas = forwardRef((props, ref) => {
       </Stage>
     </div>
   );
-});
+}
 
-Canvas.displayName = 'Canvas';
 export default Canvas;
