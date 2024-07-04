@@ -1,6 +1,5 @@
 'use client';
 import React, { useRef, useEffect, useState } from "react";
-import dynamic from 'next/dynamic';
 import { Button } from "@/components/ui/button";
 import { MicIndicator } from "@/components/ui/mic-indicator";
 import { CounterClockwiseClockIcon } from "@radix-ui/react-icons";
@@ -15,8 +14,11 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import CanvasWrapper from "@/components/ui/canvas-wrapper";
 
+import dynamic from 'next/dynamic';
+const Canvas = dynamic(() => import('@/components/ui/canvas'), {
+    ssr: false,
+  });
 export default function Playground() {
     const canvasRef = useRef<any>(null);
     const [pauseTimer, setPauseTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
@@ -110,8 +112,7 @@ export default function Playground() {
                     </AlertDialogContent>
                 </AlertDialog>
             }
-
-            <CanvasWrapper backgroundColor={'red'} ref={canvasRef} />
+            <Canvas backgroundColor={'red'} canvasRef={canvasRef} />
             <div className="flex items-center space-x-2">
                 <Button onClick={() => {
                     const canvas = canvasRef.current;
