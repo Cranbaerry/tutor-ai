@@ -1,49 +1,60 @@
-import { Metadata } from "next"
-import Image from "next/image"
-import React, { useCallback, useRef } from 'react';
+'use client';
+import React, { useState } from 'react';
+import { useAudioPlayer } from 'react-use-audio-player';
 
-import { Separator } from "@/components/ui/separator"
-import { UserNav } from "@/components/ui/user-nav"
-import Playground from "@/components/ui/playground"
+const AudioPlayer = () => {
+  const [audioStream, setAudioStream] = useState(null);
 
-export const metadata: Metadata = {
-  title: "TutorAI",
-  description: "Chatbot System with Retrieval Augmentent Generation for Enhanced Self-Learning Experience",
-}
+  const playAudio = async () => {
+    try {
+      const response = await fetch('/api/tts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: 'Your text to convert to speech' }),
+      });
 
-export default function Main() {
+      const { load } = useAudioPlayer();
+
+      const reader = response.body.getReader();
+      const audioStream = new ReadableStream({
+        start(controller) {
+          function push() {
+            reader.read().then(({ done, value }) => {
+              if (done) {
+                controller.close();
+                return;
+              }
+              controller.enqueue(value);
+              push();
+            }).catch(error => {
+              console.error('Error reading stream:', error);
+              controller.error(error);
+            });
+          }
+
+          push();
+        }
+      });
+
+      setAudioStream(audioStream);
+
+    } catch (error) {
+      console.error('Error fetching audio:', error);
+    }
+  };
+
   return (
-    <>
-      <div className="md:hidden">
-        <Image
-          src="/examples/playground-light.png"
-          width={1280}
-          height={916}
-          alt="TutorAI"
-          className="block dark:hidden"
-        />
-        <Image
-          src="/examples/playground-dark.png"
-          width={1280}
-          height={916}
-          alt="TutorAI"
-          className="hidden dark:block"
-        />
-      </div>
-      <div className="hidden h-full flex-col md:flex">
-        <div className="container flex flex-col items-start justify-between space-y-2 py-4 sm:flex-row sm:items-center sm:space-y-0 md:h-16">
-          <h2 className="text-lg font-semibold">TutorAI</h2>
-          <div className="ml-auto flex w-full space-x-2 sm:justify-end">
-            <UserNav />
-          </div>
-        </div>
-        <Separator />
-        <div className="container h-full py-6">
-          <div className="flex h-full flex-col space-y-4">
-            <Playground />
-          </div>
-        </div>
-      </div>
-    </>
-  )
-}
+    <div>
+      <button onClick={playAudio}>Play Audio</button>
+      {audioStream && (
+        <audio controls>
+          <source src={URL.createObjectURL(new Blob([audioStream]))} type="audio/webm" />
+        </audio>
+      )}
+    </div>
+  );
+};
+
+export default AudioPlayer;
