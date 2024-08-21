@@ -14,14 +14,27 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
+import { TTS } from "@/components/ui/tts"
 import dynamic from 'next/dynamic';
+import { Badge } from "@/components/ui/badge"
 const Canvas = dynamic(() => import('@/components/ui/canvas'), {
     ssr: false,
-  });
+});
 export default function Playground() {
     const canvasRef = useRef<any>(null);
+    const ttsRef = useRef<{
+        generateTTS: (text: string) => void;
+        getTTSLoadingStatus: () => boolean;
+        getTTSPlayingStatus: () => boolean
+    }>();
+    const handleGenerateTTS = () => {
+        if (ttsRef.current) {
+            ttsRef.current.generateTTS("Hey mommy!");
+        }
+    };
+
     const [pauseTimer, setPauseTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
+    const [status, setStatus] = useState<'Start speaking' | 'Listening' | 'Speak to interrupt'>('Start speaking');
     const {
         transcript,
         finalTranscript,
@@ -79,6 +92,21 @@ export default function Playground() {
         };
     }, []);
 
+    useEffect(() => {
+        if (ttsRef.current) {
+            const checkStatus = () => {
+                if (ttsRef.current?.getTTSLoadingStatus() || ttsRef.current?.getTTSPlayingStatus()) {
+                    setStatus('Speak to interrupt');
+                } else if (status !== 'Start speaking') {
+                    setStatus('Listening');
+                }
+            };
+
+            const intervalId = setInterval(checkStatus, 500);
+            return () => clearInterval(intervalId);
+        }
+    }, [ttsRef.current]);
+
     return (
         <>
             {!browserSupportsSpeechRecognition &&
@@ -112,21 +140,12 @@ export default function Playground() {
                     </AlertDialogContent>
                 </AlertDialog>
             }
-            <Canvas backgroundColor={'red'} canvasRef={canvasRef} />
+            <Canvas backgroundColor={''} canvasRef={canvasRef} />
             <div className="flex items-center space-x-2">
-                <Button onClick={() => {
-                    const canvas = canvasRef.current;
-                    console.log(canvas);
-                    if (!canvas) return;
-                    const data = canvas.handleExport();
-                    console.log(data);
-                }}>Submit</Button>
-                <Button variant="secondary">
-                    <span className="sr-only">Show history</span>
-                    <CounterClockwiseClockIcon className="h-4 w-4" />
-                </Button>
+                <TTS ref={ttsRef} width={100} height={50} />
+                <Badge>{status}</Badge>
                 <MicIndicator listening={listening} transcript={transcript} />
-            </div>
+            </div>          
         </>
     );
 }

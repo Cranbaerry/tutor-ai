@@ -1,8 +1,11 @@
-import { Stage, Layer, Line } from 'react-konva';
+import { Stage, Layer, Line, Text } from 'react-konva';
 import React, { useEffect, useRef, useState, useImperativeHandle } from "react";
 import { KonvaEventObject } from 'konva/lib/Node';
 import { CanvasProps, LineData } from '@/lib/definitions';
 import Konva from 'konva';
+import {
+  Card,
+} from "@/components/ui/card";
 
 function Canvas(props: CanvasProps) {
   const divRef = useRef<HTMLDivElement>(null);
@@ -14,6 +17,7 @@ function Canvas(props: CanvasProps) {
     width: 0,
     height: 0
   });
+  const [showPlaceholder, setShowPlaceholder] = useState<boolean>(true);
 
   useImperativeHandle(props.canvasRef, () => ({
     handleExport: () => handleExport(),
@@ -28,6 +32,7 @@ function Canvas(props: CanvasProps) {
   };
 
   const handleMouseDown = (e: KonvaEventObject<MouseEvent>) => {
+    if (showPlaceholder) setShowPlaceholder(false);
     isDrawing.current = true;
     const stage = e.target.getStage();
     const pos = stage?.getPointerPosition();
@@ -63,33 +68,50 @@ function Canvas(props: CanvasProps) {
 
   return (
     <div ref={divRef} className="h-full w-full">
-      <Stage
-        ref={stageRef}
-        width={dimensions.width}
-        height={dimensions.height}
-        draggable={false}
-        style={{ backgroundColor: props.backgroundColor }}
-        onMouseDown={handleMouseDown}
-        onMousemove={handleMouseMove}
-        onMouseup={handleMouseUp}
-      >
-        <Layer>
-          {lines.map((line, i) => (
-            <Line
-              key={i}
-              points={line.points}
-              stroke="#fff"
-              strokeWidth={5}
-              tension={0.5}
-              lineCap="round"
-              lineJoin="round"
-              globalCompositeOperation={
-                line.tool === 'eraser' ? 'destination-out' : 'source-over'
-              }
-            />
-          ))}
-        </Layer>
-      </Stage>
+      <Card>
+        <Stage
+          ref={stageRef}
+          width={dimensions.width}
+          height={dimensions.height}
+          draggable={false}
+          style={{ backgroundColor: props.backgroundColor, borderColor: "#e4e4e7"}}
+          onMouseDown={handleMouseDown}
+          onMousemove={handleMouseMove}
+          onMouseup={handleMouseUp}
+        >
+          <Layer>
+            {lines.map((line, i) => (
+              <Line
+                key={i}
+                points={line.points}
+                stroke="#000"
+                strokeWidth={5}
+                tension={0.5}
+                lineCap="round"
+                lineJoin="round"
+                globalCompositeOperation={
+                  line.tool === 'eraser' ? 'destination-out' : 'source-over'
+                }
+              />
+            ))}
+            {showPlaceholder && (
+              <Text
+                text="Interact to start drawing"
+                x={dimensions.width / 2}
+                y={dimensions.height / 2}
+                fontSize={24}
+                fontFamily="Arial"
+                fill="gray"
+                align="center"
+                verticalAlign="middle"
+                offsetX={150} // Half of the text width
+                offsetY={40} // Half of the text height
+                padding={20}
+              />
+            )}
+          </Layer>
+        </Stage>
+      </Card>
     </div>
   );
 }
