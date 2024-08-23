@@ -16,6 +16,7 @@ import { z } from "zod"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { agreements, question5, question6, question7, question9 } from "./options"
+import { useRouter } from 'next/navigation'
 
 const formSchema = z.object({
     fullname: z.string().min(2, {
@@ -70,6 +71,8 @@ const formSchema = z.object({
   })
 
 export default function Kuisioner(){
+    const router = useRouter()
+
     // 1. Define your form.
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -90,11 +93,12 @@ export default function Kuisioner(){
         // Do something with the form values.
         // ✅ This will be type-safe and validated.
         console.log(values)
+        router.push("/petunjuk-penggunaan")
     }
 
     return (
         <main className="flex min-h-screen flex-row items-start justify-between p-20 bg-[rgb(245,245,245)]">
-            <NavigationMenu className="w-1/3">
+            <NavigationMenu className="w-1/4">
                 <NavigationMenuList className="flex-col items-start fixed top-25 left-10">
                     <NavigationMenuItem>
                         <Link href="#surat-persetujuan" legacyBehavior passHref>
@@ -117,17 +121,10 @@ export default function Kuisioner(){
                             </NavigationMenuLink>
                         </Link>
                     </NavigationMenuItem>
-                    <NavigationMenuItem>
-                        <Link href="/test" legacyBehavior passHref>
-                            <NavigationMenuLink className={`bg-[rgb(245,245,245)] text-gray-600 hover:text-black focus:text-black leading-loose`}>
-                               Petunjuk Penggunaan
-                            </NavigationMenuLink>
-                        </Link>
-                    </NavigationMenuItem>
                 </NavigationMenuList>
             </NavigationMenu>
 
-            <div className="h-full w-2/3">
+            <div className="h-full w-3/4">
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                     <div id="surat-persetujuan" className="rounded-md border-0 p-4 bg-[rgb(255,255,255)]">
@@ -623,7 +620,7 @@ export default function Kuisioner(){
                             <br />
                             <FormField
                                 control={form.control}
-                                name="question4"
+                                name="question8"
                                 render={({ field }) => (
                                     <FormItem className="space-y-3">
                                         <FormLabel>Apakah Anda setuju bila ChatGPT digunakan sebagai asisten belajar siswa?</FormLabel>
