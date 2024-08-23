@@ -187,4 +187,5 @@ const TTS = forwardRef((props: TTSProps, ref) => {
     );
 });
 
+TTS.displayName = 'TTS';
 export { TTS };
