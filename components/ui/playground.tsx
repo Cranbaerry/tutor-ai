@@ -145,7 +145,7 @@ export default function Playground() {
                 <TTS ref={ttsRef} width={100} height={50} />
                 <Badge>{status}</Badge>
                 <MicIndicator listening={listening} transcript={transcript} />
-            </div>          
+            </div>
         </>
     );
 }
