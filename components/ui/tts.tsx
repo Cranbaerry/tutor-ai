@@ -1,7 +1,5 @@
-"use client";
-
+'use client';
 import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
-
 interface TTSProps {
     width?: number;
     height?: number;
@@ -14,6 +12,8 @@ const TTS = forwardRef((props: TTSProps, ref) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const analyserRef = useRef<AnalyserNode | null>(null);
+    const externalAudioAnalyserRef = useRef<AnalyserNode | null>(null); 
+
 
     const drawBar = (ctx: CanvasRenderingContext2D, x: number, barHeight: number, radii: number) => {
         ctx.beginPath();
@@ -80,7 +80,6 @@ const TTS = forwardRef((props: TTSProps, ref) => {
         };
 
         audio.onended = () => {
-            //analyserRef.current = null;
             setIsPlaying(false);
         };
 
@@ -101,26 +100,65 @@ const TTS = forwardRef((props: TTSProps, ref) => {
             }
 
             const pump = async () => {
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) {
-                        if (sourceBuffer.updating) {
-                            await new Promise(resolve => {
-                                sourceBuffer.addEventListener('updateend', resolve, { once: true });
-                            });
+                if (!reader || !sourceBuffer) return;
+            
+                const chunkQueue: Uint8Array[] = [];
+            
+                const appendNextChunk = async () => {
+                    if (chunkQueue.length === 0) return;
+            
+                    if (!sourceBuffer.updating) {
+                        const chunk = chunkQueue.shift();
+                        if (chunk) {
+                            sourceBuffer.appendBuffer(chunk);
                         }
-                        mediaSource.endOfStream();
-                        break;
                     }
-
-                    if (sourceBuffer.updating) {
+            
+                    if (chunkQueue.length > 0) {
+                        // Keep checking if we can append the next chunk
                         await new Promise(resolve => {
                             sourceBuffer.addEventListener('updateend', resolve, { once: true });
                         });
+                        appendNextChunk();
                     }
-                    sourceBuffer.appendBuffer(value);
+                };
+            
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) {
+                        if (!sourceBuffer.updating) {
+                            mediaSource.endOfStream();
+                        }
+                        break;
+                    }
+            
+                    chunkQueue.push(value);
+                    appendNextChunk();
                 }
             };
+            
+
+            // const pump = async () => {
+            //     while (true) {
+            //         const { done, value } = await reader.read();
+            //         if (done) {
+            //             if (sourceBuffer.updating) {
+            //                 await new Promise(resolve => {
+            //                     sourceBuffer.addEventListener('updateend', resolve, { once: true });
+            //                 });
+            //             }
+            //             mediaSource.endOfStream();
+            //             break;
+            //         }
+
+            //         if (sourceBuffer.updating) {
+            //             await new Promise(resolve => {
+            //                 sourceBuffer.addEventListener('updateend', resolve, { once: true });
+            //             });
+            //         }
+            //         sourceBuffer.appendBuffer(value);
+            //     }
+            // };
 
             await pump();
         } else {
@@ -137,38 +175,56 @@ const TTS = forwardRef((props: TTSProps, ref) => {
         },
         getTTSPlayingStatus: () => {
             return isPlaying;
+        },
+        startExternalAudioVisualization: (stream: MediaStream) => {
+            console.log("Incoming external audio");
+            if (analyserRef.current) {
+                analyserRef.current.disconnect();
+            }
+            const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+            const analyserNode = audioContext.createAnalyser();
+
+            analyserNode.fftSize = 2048;
+            analyserNode.minDecibels = -160;
+            analyserNode.maxDecibels = -20;
+
+            const source = audioContext.createMediaStreamSource(stream);
+            source.connect(analyserNode);
+            analyserRef.current = analyserNode;
+
+            requestAnimationFrame(drawWaveform);
         }
     }));
 
+    const drawWaveform = () => {
+        const canvas = canvasRef.current;
+        const analyser = analyserRef.current;
+        if (!canvas || !analyser) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        analyser.getByteFrequencyData(dataArray);
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const barWidth = canvas.width / 4.5;
+        const spacing = (canvas.width - barWidth * 4) / 3;
+        const radii = barWidth / 2;
+
+        for (let i = 0; i < 4; i++) {
+            const index = Math.floor(Math.pow(i / 4, 2) * (bufferLength - 1));
+            const value = dataArray[index] / 255;
+            const barHeight = 4 + (value * (canvas.height * 0.7 - 4));
+            const x = spacing * i + barWidth * i + radii;
+            drawBar(ctx, x, barHeight, radii);
+        }
+
+        requestAnimationFrame(drawWaveform);
+    };
+
     useEffect(() => {
-        const drawWaveform = () => {
-            const canvas = canvasRef.current;
-            const analyser = analyserRef.current;
-            if (!canvas || !analyser) return;
-            const ctx = canvas.getContext('2d');
-            if (!ctx) return;
-
-            const bufferLength = analyser.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
-            analyser.getByteFrequencyData(dataArray);
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            const barWidth = canvas.width / 4.5;
-            const spacing = (canvas.width - barWidth * 4) / 3;
-            const radii = barWidth / 2;
-
-            for (let i = 0; i < 4; i++) {
-                const index = Math.floor(Math.pow(i / 4, 2) * (bufferLength - 1));
-                const value = dataArray[index] / 255;
-                const barHeight = 4 + (value * (canvas.height * 0.7 - 4));
-                const x = spacing * i + barWidth * i + radii;
-                drawBar(ctx, x, barHeight, radii);
-            }
-
-            requestAnimationFrame(drawWaveform);
-        };
-
         initialDraw();
 
         if (analyserRef.current) {
@@ -178,11 +234,7 @@ const TTS = forwardRef((props: TTSProps, ref) => {
 
     return (
         <div>
-            {/* <button onClick={getTTS} disabled={loading}>
-                {loading ? "Generating..." : "Generate TTS"}
-            </button> */}
             <canvas ref={canvasRef} width={width} height={height} />
-            {/* {isPlaying && <div>Playing Audio...</div>} */}
         </div>
     );
 });

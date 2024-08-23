@@ -17,24 +17,23 @@ import {
 import { TTS } from "@/components/ui/tts"
 import dynamic from 'next/dynamic';
 import { Badge } from "@/components/ui/badge"
+
 const Canvas = dynamic(() => import('@/components/ui/canvas'), {
     ssr: false,
 });
+
 export default function Playground() {
     const canvasRef = useRef<any>(null);
     const ttsRef = useRef<{
         generateTTS: (text: string) => void;
         getTTSLoadingStatus: () => boolean;
-        getTTSPlayingStatus: () => boolean
+        getTTSPlayingStatus: () => boolean;
+        startExternalAudioVisualization: (stream: MediaStream) => void;  // New method
     }>();
-    const handleGenerateTTS = () => {
-        if (ttsRef.current) {
-            ttsRef.current.generateTTS("Hey mommy!");
-        }
-    };
 
     const [pauseTimer, setPauseTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
     const [status, setStatus] = useState<'Start speaking' | 'Listening' | 'Speak to interrupt'>('Start speaking');
+    const [activeStream, setActiveStream] = useState<'user' | 'bot' | null>('user');
     const {
         transcript,
         finalTranscript,
@@ -44,24 +43,10 @@ export default function Playground() {
         isMicrophoneAvailable
     } = useSpeechRecognition();
 
-    // Function to handle sending transcript to the API
     const sendTranscript = async () => {
         if (finalTranscript.trim() !== '') {
             console.log('Sending transcript to API: ', finalTranscript);
-            // try {
-            //     const response = await fetch('https://your-api-endpoint.com/transcribe', {
-            //         method: 'POST',
-            //         headers: {
-            //             'Content-Type': 'application/json',
-            //         },
-            //         body: JSON.stringify({ transcript: finalTranscript }),
-            //     });
-            //     const data = await response.json();
-            //     console.log('Success:', data);
-            //     resetTranscript();
-            // } catch (error) {
-            //     console.error('Error:', error);
-            // }
+            ttsRef.current?.generateTTS('n publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document or a typeface without relying on meaningful content. Lorem ipsum may be used as a placeholder before the final copy is available');
         }
     };
 
@@ -92,20 +77,48 @@ export default function Playground() {
         };
     }, []);
 
-    useEffect(() => {
-        if (ttsRef.current) {
-            const checkStatus = () => {
-                if (ttsRef.current?.getTTSLoadingStatus() || ttsRef.current?.getTTSPlayingStatus()) {
-                    setStatus('Speak to interrupt');
-                } else if (status !== 'Start speaking') {
-                    setStatus('Listening');
-                }
-            };
+    // useEffect(() => {
+    //     if (ttsRef.current) {
+    //         const checkStatus = () => {
+    //             if (ttsRef.current?.getTTSLoadingStatus() || ttsRef.current?.getTTSPlayingStatus()) {
+    //                 setStatus('Speak to interrupt');
+    //             }
+    //         };
 
-            const intervalId = setInterval(checkStatus, 500);
-            return () => clearInterval(intervalId);
+    //         const intervalId = setInterval(checkStatus, 500);
+    //         return () => clearInterval(intervalId);
+    //     }
+    // }, [ttsRef.current]);
+
+    useEffect(() => {
+        if (transcript.trim() !== '') {
+            if (status !== 'Speak to interrupt') {
+                
+            }
+        } else if (!ttsRef.current?.getTTSPlayingStatus()) {
+            setStatus('Start speaking');
         }
-    }, [ttsRef.current]);
+    }, [transcript]);
+
+    useEffect(() => {
+        if (activeStream == 'user') {
+            setStatus('Listening');
+            navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+                if (ttsRef.current) {
+                    ttsRef.current.startExternalAudioVisualization(stream);
+                }
+            });
+        } else {
+            setStatus('Speak to interrupt');
+        }
+    }, [activeStream]);
+
+    useEffect(() => {
+        if (ttsRef.current?.getTTSPlayingStatus() && activeStream !== 'bot') {
+            setActiveStream('bot');
+            //ttsRef.current.startExternalAudioVisualization(null);
+        }
+    }, [ttsRef.current?.getTTSPlayingStatus()]);
 
     return (
         <>
