@@ -8,8 +8,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     await tts.setMetadata(voiceName, OUTPUT_FORMAT.WEBM_24KHZ_16BIT_MONO_OPUS);
     const readable = tts.toStream(text);
 
-    readable.on('data', (chunk) => {
-      console.log(chunk);
+    readable.on('data', async (chunk) => {
       res.write(chunk);
     });
 
@@ -24,3 +23,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.status(405).json({ message: 'Method Not Allowed' });
   }
 }
+
+export const config = {
+  api: {
+    externalResolver: true,
+  },
+};
