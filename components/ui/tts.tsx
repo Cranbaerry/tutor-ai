@@ -55,7 +55,19 @@ const TTS = forwardRef((props: TTSProps, ref) => {
         let sourceBuffer: SourceBuffer;
 
         mediaSource.addEventListener('sourceopen', () => {
-            sourceBuffer = mediaSource.addSourceBuffer('audio/webm; codecs="opus"');
+            // Clean up any existing SourceBuffer if necessary
+            if (sourceBuffer) {
+                // We should only have one SourceBuffer, but ensure old ones are cleaned up
+                const buffers = mediaSource.sourceBuffers;
+                for (let i = buffers.length - 1; i >= 0; i--) {
+                    mediaSource.removeSourceBuffer(buffers[i]);
+                }
+            }
+    
+            // Add new SourceBuffer
+            if (!sourceBuffer) {
+                sourceBuffer = mediaSource.addSourceBuffer('audio/webm; codecs="opus"');
+            }
         });
 
         const audio = new Audio();
