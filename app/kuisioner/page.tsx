@@ -17,58 +17,59 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { agreements, question5, question6, question7, question9 } from "./options"
 import { useRouter } from 'next/navigation'
+import { insert } from './actions'
 
 const formSchema = z.object({
     fullname: z.string().min(2, {
-      message: "Nama lengkap harus setidaknya 2 karakter.",
+        message: "Nama lengkap harus setidaknya 2 karakter.",
     }),
     email: z.string({
         required_error: "Email harus diisi.",
-      }).email(),
+    }).email(),
     whatsappNumber: z.string(),
     gender: z.enum(["laki-laki", "perempuan"], {
         required_error: "Pilih salah satu opsi jenis kelamin",
-      }),
+    }),
     profession: z.string({
         required_error: "Pilih salah satu opsi profesi.",
-      }),
+    }),
     educationLevel: z.string({
         required_error: "Pilih salah satu opsi jenjang pendidikan.",
-      }),
+    }),
     school: z.string({
         required_error: "Asal sekolah/institusi harus diisi.",
     }),
     agreements: z.array(z.string()).refine((value) => value.length == agreements.length, {
         message: "Anda harus menyetujui semua poin.",
-      }),
+    }),
     question1: z.enum(["pernah", "tidak_pernah"], {
         required_error: "Pilih salah satu opsi.",
-      }),
+    }),
     question2: z.enum(["tidak_paham", "sedikit_paham", "cukup_paham", "sangat_paham"], {
         required_error: "Pilih salah satu opsi.",
-      }),
+    }),
     question3: z.enum(["pernah", "tidak_pernah"], {
         required_error: "Pilih salah satu opsi.",
-      }),
+    }),
     question4: z.enum(["ya", "tidak"], {
         required_error: "Pilih salah satu opsi.",
-      }),
+    }),
     question5: z.array(z.string()).refine((value) => value.some((item) => item), {
         message: "Pilih setidaknya satu dari opsi-opsi di atas.",
-      }),
+    }),
     question6: z.array(z.string()).refine((value) => value.some((item) => item), {
         message: "Pilih setidaknya satu dari opsi-opsi di atas.",
-      }),
+    }),
     question7: z.array(z.string()).refine((value) => value.some((item) => item), {
         message: "Pilih setidaknya satu dari opsi-opsi di atas.",
-      }),
+    }),
     question8: z.enum(["setuju", "mungkin", "tidak_setuju"], {
         required_error: "Pilih salah satu opsi.",
-      }),
+    }),
     question9: z.array(z.string()).refine((value) => value.some((item) => item), {
         message: "Pilih setidaknya satu dari opsi-opsi di atas.",
-      }),
-  })
+    }),
+})
 
 export default function Kuisioner(){
     const router = useRouter()
@@ -92,7 +93,8 @@ export default function Kuisioner(){
     function onSubmit(values: z.infer<typeof formSchema>) {
         // Do something with the form values.
         // ✅ This will be type-safe and validated.
-        console.log(values)
+
+        insert(values)
         router.push("/petunjuk-penggunaan")
     }
 
