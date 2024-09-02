@@ -32,7 +32,7 @@ export default function Playground() {
     }>();
 
     const [pauseTimer, setPauseTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
-    const [status, setStatus] = useState<'Start speaking' | 'Listening' | 'Speak to interrupt'>('Start speaking');
+    const [status, setStatus] = useState<'Listening' | 'Speak to interrupt'>('Listening');
     const [activeStream, setActiveStream] = useState<'user' | 'bot' | null>('user');
     const {
         transcript,
@@ -77,48 +77,36 @@ export default function Playground() {
         };
     }, []);
 
-    // useEffect(() => {
-    //     if (ttsRef.current) {
-    //         const checkStatus = () => {
-    //             if (ttsRef.current?.getTTSLoadingStatus() || ttsRef.current?.getTTSPlayingStatus()) {
-    //                 setStatus('Speak to interrupt');
-    //             }
-    //         };
-
-    //         const intervalId = setInterval(checkStatus, 500);
-    //         return () => clearInterval(intervalId);
-    //     }
-    // }, [ttsRef.current]);
-
     useEffect(() => {
-        if (transcript.trim() !== '') {
-            if (status !== 'Speak to interrupt') {
-                
-            }
-        } else if (!ttsRef.current?.getTTSPlayingStatus()) {
-            setStatus('Start speaking');
-        }
-    }, [transcript]);
-
-    useEffect(() => {
-        if (activeStream == 'user') {
+        if (activeStream === 'user') {
             setStatus('Listening');
-            navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-                if (ttsRef.current) {
-                    ttsRef.current.startExternalAudioVisualization(stream);
-                }
-            });
+                    navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+            if (ttsRef.current) {
+                ttsRef.current.startExternalAudioVisualization(stream);
+            }
+        });
         } else {
             setStatus('Speak to interrupt');
         }
     }, [activeStream]);
+    
+    useEffect(() => {
+        if (transcript.trim() !== '') {
+            setActiveStream('user');
+        }
+    }, [transcript]);
 
     useEffect(() => {
-        if (ttsRef.current?.getTTSPlayingStatus() && activeStream !== 'bot') {
+        console.log('activeStream changed: ' + activeStream);
+    }, [activeStream]);
+
+    const handleTTSPlayingStatusChange = (status: boolean) => {
+        if (status) {
             setActiveStream('bot');
-            //ttsRef.current.startExternalAudioVisualization(null);
+        } else {
+            setActiveStream('user');
         }
-    }, [ttsRef.current?.getTTSPlayingStatus()]);
+    };   
 
     return (
         <>
@@ -155,7 +143,7 @@ export default function Playground() {
             }
             <Canvas backgroundColor={''} canvasRef={canvasRef} />
             <div className="flex items-center space-x-2">
-                <TTS ref={ttsRef} width={100} height={50} />
+                <TTS ref={ttsRef} width={100} height={50} onPlayingStatusChange={handleTTSPlayingStatusChange} />
                 <Badge>{status}</Badge>
                 <MicIndicator listening={listening} transcript={transcript} />
             </div>

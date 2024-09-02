@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } f
 interface TTSProps {
     width?: number;
     height?: number;
+    onPlayingStatusChange: (status: boolean) => void;
 }
 
 const TTS = forwardRef((props: TTSProps, ref) => {
@@ -12,7 +13,7 @@ const TTS = forwardRef((props: TTSProps, ref) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const analyserRef = useRef<AnalyserNode | null>(null);
-    const externalAudioAnalyserRef = useRef<AnalyserNode | null>(null); 
+    const externalAudioAnalyserRef = useRef<AnalyserNode | null>(null);
 
 
     const drawBar = (ctx: CanvasRenderingContext2D, x: number, barHeight: number, radii: number) => {
@@ -55,15 +56,15 @@ const TTS = forwardRef((props: TTSProps, ref) => {
         let sourceBuffer: SourceBuffer;
 
         mediaSource.addEventListener('sourceopen', () => {
-            // Clean up any existing SourceBuffer if necessary
-            if (sourceBuffer) {
-                // We should only have one SourceBuffer, but ensure old ones are cleaned up
-                const buffers = mediaSource.sourceBuffers;
-                for (let i = buffers.length - 1; i >= 0; i--) {
-                    mediaSource.removeSourceBuffer(buffers[i]);
-                }
-            }
-    
+            // // Clean up any existing SourceBuffer if necessary
+            // if (sourceBuffer) {
+            //     // We should only have one SourceBuffer, but ensure old ones are cleaned up
+            //     const buffers = mediaSource.sourceBuffers;
+            //     for (let i = buffers.length - 1; i >= 0; i--) {
+            //         mediaSource.removeSourceBuffer(buffers[i]);
+            //     }
+            // }
+
             // Add new SourceBuffer
             if (!sourceBuffer) {
                 sourceBuffer = mediaSource.addSourceBuffer('audio/webm; codecs="opus"');
@@ -113,19 +114,19 @@ const TTS = forwardRef((props: TTSProps, ref) => {
 
             const pump = async () => {
                 if (!reader || !sourceBuffer) return;
-            
+
                 const chunkQueue: Uint8Array[] = [];
-            
+
                 const appendNextChunk = async () => {
                     if (chunkQueue.length === 0) return;
-            
+
                     if (!sourceBuffer.updating) {
                         const chunk = chunkQueue.shift();
                         if (chunk) {
                             sourceBuffer.appendBuffer(chunk);
                         }
                     }
-            
+
                     if (chunkQueue.length > 0) {
                         // Keep checking if we can append the next chunk
                         await new Promise(resolve => {
@@ -134,7 +135,7 @@ const TTS = forwardRef((props: TTSProps, ref) => {
                         appendNextChunk();
                     }
                 };
-            
+
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) {
@@ -143,12 +144,12 @@ const TTS = forwardRef((props: TTSProps, ref) => {
                         }
                         break;
                     }
-            
+
                     chunkQueue.push(value);
                     appendNextChunk();
                 }
             };
-            
+
 
             // const pump = async () => {
             //     while (true) {
@@ -189,7 +190,6 @@ const TTS = forwardRef((props: TTSProps, ref) => {
             return isPlaying;
         },
         startExternalAudioVisualization: (stream: MediaStream) => {
-            console.log("Incoming external audio");
             if (analyserRef.current) {
                 analyserRef.current.disconnect();
             }
@@ -207,6 +207,12 @@ const TTS = forwardRef((props: TTSProps, ref) => {
             requestAnimationFrame(drawWaveform);
         }
     }));
+
+
+    useEffect(() => {
+        props.onPlayingStatusChange(isPlaying);
+      }, [isPlaying]);
+
 
     const drawWaveform = () => {
         const canvas = canvasRef.current;
