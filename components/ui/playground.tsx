@@ -17,6 +17,10 @@ import {
 import { TTS } from "@/components/ui/tts"
 import dynamic from 'next/dynamic';
 import { Badge } from "@/components/ui/badge"
+import { Slider } from "@/components/ui/slider"
+import { Separator } from "@/components/ui/separator"
+
+
 
 const Canvas = dynamic(() => import('@/components/ui/canvas'), {
     ssr: false,
@@ -28,7 +32,7 @@ export default function Playground() {
         generateTTS: (text: string) => void;
         getTTSLoadingStatus: () => boolean;
         getTTSPlayingStatus: () => boolean;
-        startExternalAudioVisualization: (stream: MediaStream) => void;  // New method
+        startExternalAudioVisualization: (stream: MediaStream) => void; 
     }>();
 
     const [pauseTimer, setPauseTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
@@ -42,6 +46,7 @@ export default function Playground() {
         browserSupportsSpeechRecognition,
         isMicrophoneAvailable
     } = useSpeechRecognition();
+
 
     const sendTranscript = async () => {
         if (finalTranscript.trim() !== '') {
@@ -80,16 +85,16 @@ export default function Playground() {
     useEffect(() => {
         if (activeStream === 'user') {
             setStatus('Listening');
-                    navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-            if (ttsRef.current) {
-                ttsRef.current.startExternalAudioVisualization(stream);
-            }
-        });
+            navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+                if (ttsRef.current) {
+                    ttsRef.current.startExternalAudioVisualization(stream);
+                }
+            });
         } else {
             setStatus('Speak to interrupt');
         }
     }, [activeStream]);
-    
+
     useEffect(() => {
         if (transcript.trim() !== '') {
             setActiveStream('user');
@@ -106,7 +111,7 @@ export default function Playground() {
         } else {
             setActiveStream('user');
         }
-    };   
+    };
 
     return (
         <>
@@ -141,9 +146,10 @@ export default function Playground() {
                     </AlertDialogContent>
                 </AlertDialog>
             }
-            <Canvas backgroundColor={''} canvasRef={canvasRef} />
-            <div className="flex items-center space-x-2">
-                <TTS ref={ttsRef} width={100} height={50} onPlayingStatusChange={handleTTSPlayingStatusChange} />
+
+            <Canvas backgroundColor={'rgb(250 250 250 / 1)'} canvasRef={canvasRef} />
+            <div className="fixed flex bottom-8 left-24 items-center space-x-2">
+                <TTS ref={ttsRef} width={50} height={40} onPlayingStatusChange={handleTTSPlayingStatusChange} />
                 <Badge>{status}</Badge>
                 <MicIndicator listening={listening} transcript={transcript} />
             </div>

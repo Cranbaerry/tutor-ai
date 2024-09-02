@@ -4,6 +4,7 @@ import React, { useCallback, useRef, useState } from 'react';
 
 import { Separator } from "@/components/ui/separator"
 import { UserNav } from "@/components/ui/user-nav"
+import { MainNav } from "@/components/ui/main-nav"
 import Playground from "@/components/ui/playground"
 
 export const metadata: Metadata = {
@@ -15,7 +16,7 @@ export default function Main() {
     return (
         <>
             <div className="hidden h-full flex-col md:flex">
-                <div className="container flex flex-col items-start justify-between space-y-2 py-4 sm:flex-row sm:items-center sm:space-y-0 md:h-16">
+                <div className="flex flex-col items-start justify-between space-y-2 p-4 sm:flex-row sm:items-center sm:space-y-0 md:h-16">
                     <Image
                         className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert items-center justify-center mr-1"
                         src="/beexpert-logo.svg"
@@ -33,11 +34,12 @@ export default function Main() {
                         priority
                     />
                     <div className="ml-auto flex w-full space-x-2 sm:justify-end">
+                        <MainNav className="mx-6" />
                         <UserNav />
                     </div>
                 </div>
                 <Separator />
-                <div className="container h-full py-6">
+                <div className="h-full py-6 px-4">
                     <div className="flex h-full flex-col space-y-4">
                         <Playground />
                     </div>
