@@ -6,3 +6,6 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+# PDF Source book
+Algebra-and-Trigonometry-2e-WEB.pdf
