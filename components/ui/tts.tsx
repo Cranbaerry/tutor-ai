@@ -16,6 +16,7 @@ const TTS = forwardRef((props: TTSProps, ref) => {
     const [loading, setLoading] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const [queue, setQueue] = useState<TTSQueueItem[]>([]);
+    const isProcessingQueue = useRef(false);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const analyserRef = useRef<AnalyserNode | null>(null);
 
@@ -70,13 +71,16 @@ const TTS = forwardRef((props: TTSProps, ref) => {
     };
 
     const processQueue = async () => {
+        if (isProcessingQueue.current) return; 
         if (queue.length > 0 && !isPlaying) {
+            isProcessingQueue.current = true;
             const nextItem = queue[0];
             setQueue(queue.slice(1)); 
             if (nextItem.audioBuffer) {
                 console.log('Playing: ' + nextItem.text);
                 await playAudio(nextItem.audioBuffer);
             }
+            isProcessingQueue.current = false;
         }
     };
 
@@ -155,6 +159,13 @@ const TTS = forwardRef((props: TTSProps, ref) => {
         },
         getTTSPlayingStatus: () => {
             return isPlaying;
+        },
+        getTTSQueueCount: () => {
+            return queue.length;
+        },
+        clearTTSQueue: () => {
+            console.log('Clear queue');
+            setQueue([]);
         },
         startExternalAudioVisualization: (stream: MediaStream) => {
             if (analyserRef.current) {
