@@ -6,7 +6,7 @@ import Konva from 'konva';
 import {
   Card,
 } from "@/components/ui/card";
-import { Pencil1Icon, EraserIcon, ArrowLeftIcon, ArrowRightIcon, ZoomInIcon, ZoomOutIcon, LineHeightIcon } from '@radix-ui/react-icons'
+import { HandIcon, Pencil1Icon, EraserIcon, ArrowLeftIcon, ArrowRightIcon, ZoomInIcon, ZoomOutIcon, LineHeightIcon } from '@radix-ui/react-icons'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
@@ -20,7 +20,7 @@ import {
 function Canvas(props: CanvasProps) {
   const stageParentRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
-  const [tool, setTool] = useState<'pencil' | 'eraser'>('pencil')
+  const [tool, setTool] = useState<'pencil' | 'eraser' | 'drag'>('pencil')
   const [lines, setLines] = useState<LineData[]>([]);
   const isDrawing = useRef<boolean>(false);
   const [dimensions, setDimensions] = useState<{ width: number; height: number }>({
@@ -30,12 +30,11 @@ function Canvas(props: CanvasProps) {
   const [showPlaceholder, setShowPlaceholder] = useState<boolean>(true);
 
   // TODO: clean up later
-  const [color, setColor] = useState('#000000')
-  const [strokeWidth, setStrokeWidth] = useState(5)
-  const [scale, setScale] = useState(1)
-  const contextRef = useRef<CanvasRenderingContext2D | null>(null)
-  const [history, setHistory] = useState<ImageData[]>([])
-  const [historyStep, setHistoryStep] = useState(-1)
+  const [color, setColor] = useState('#000000');
+  const [strokeWidth, setStrokeWidth] = useState(5);
+  const [scale, setScale] = useState(1);
+  const [history, setHistory] = useState<ImageData[]>([]);
+  const [historyStep, setHistoryStep] = useState(-1);
 
   useImperativeHandle(props.canvasRef, () => ({
     handleExport: () => handleExport(),
@@ -77,15 +76,16 @@ function Canvas(props: CanvasProps) {
   };
 
   const handleMouseDown = (e: KonvaEventObject<MouseEvent>) => {
+    if (tool === 'drag') return;
     if (showPlaceholder) setShowPlaceholder(false);
     isDrawing.current = true;
     const stage = e.target.getStage();
     const pos = stage?.getPointerPosition();
-    if (!pos) return;
-    
+    if (!pos || !stage) return;
+
     const adjustedPos = {
-      x: pos.x / scale,
-      y: pos.y / scale
+      x: (pos.x - stage.x()) / scale,
+      y: (pos.y - stage.y()) / scale,
     };
   
     setLines(prevLines => [...prevLines, { tool, points: [adjustedPos.x, adjustedPos.y] }]);
@@ -93,16 +93,17 @@ function Canvas(props: CanvasProps) {
 
 
   const handleMouseMove = (e: KonvaEventObject<MouseEvent>) => {
+    if (tool === 'drag') return;
     if (!isDrawing.current) return;
     const stage = e.target.getStage();
     const pos = stage?.getPointerPosition();
-    if (!pos) return;
-  
+    if (!pos || !stage) return;
+
     const adjustedPos = {
-      x: pos.x / scale,
-      y: pos.y / scale
+      x: (pos.x - stage.x()) / scale,
+      y: (pos.y - stage.y()) / scale,
     };
-  
+
     setLines(prevLines => {
       const lastLine = prevLines[prevLines.length - 1];
       lastLine.points = lastLine.points.concat([adjustedPos.x, adjustedPos.y]);
@@ -110,9 +111,10 @@ function Canvas(props: CanvasProps) {
       return newLines;
     });
   };
-  
+
 
   const handleMouseUp = () => {
+    if (tool === 'drag') return;
     isDrawing.current = false;
     const newHistory = history.slice(0, historyStep + 1);
     setHistory([...newHistory, lines]);
@@ -121,7 +123,6 @@ function Canvas(props: CanvasProps) {
 
 
   const handleResize = () => {
-    console.log('Resizing triggered')
     var container = stageParentRef.current;
     if (!container) return;
     setDimensions({
@@ -153,6 +154,16 @@ function Canvas(props: CanvasProps) {
       <Card className="h-full">
         <div className="flex bg-background h-full">
           <div className="w-16 bg-muted p-2 flex flex-col space-y-4 border-r">
+            <TooltipWrapper content="Drag">
+              <Button
+                onClick={() => setTool('drag')}
+                variant={tool === 'drag' ? 'default' : 'ghost'}
+                size="icon"
+                className="w-full"
+              >
+                <HandIcon className="h-4 w-4" /> {/* Replace with a relevant drag icon */}
+              </Button>
+            </TooltipWrapper>
             <TooltipWrapper content="Pencil">
               <Button
                 onClick={() => setTool('pencil')}
@@ -239,7 +250,7 @@ function Canvas(props: CanvasProps) {
                 height={dimensions.height}
                 scaleX={scale}
                 scaleY={scale}
-                draggable={false}
+                draggable={tool === 'drag'}
                 style={{ backgroundColor: props.backgroundColor, borderColor: "#e4e4e7" }}
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
@@ -251,7 +262,7 @@ function Canvas(props: CanvasProps) {
                       key={i}
                       points={line.points}
                       stroke="#000"
-                      strokeWidth={5}
+                      strokeWidth={strokeWidth / scale}
                       tension={0.5}
                       lineCap="round"
                       lineJoin="round"

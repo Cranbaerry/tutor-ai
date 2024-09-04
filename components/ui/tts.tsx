@@ -6,15 +6,18 @@ interface TTSProps {
     onPlayingStatusChange: (status: boolean) => void;
 }
 
+interface TTSQueueItem {
+    text: string;
+    audioBuffer: ArrayBuffer | null;
+}
+
 const TTS = forwardRef((props: TTSProps, ref) => {
     const { width = 400, height = 200 } = props;
     const [loading, setLoading] = useState(false);
-    const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
+    const [queue, setQueue] = useState<TTSQueueItem[]>([]);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const analyserRef = useRef<AnalyserNode | null>(null);
-    const externalAudioAnalyserRef = useRef<AnalyserNode | null>(null);
-
 
     const drawBar = (ctx: CanvasRenderingContext2D, x: number, barHeight: number, radii: number) => {
         ctx.beginPath();
@@ -48,54 +51,8 @@ const TTS = forwardRef((props: TTSProps, ref) => {
         }
     };
 
-    const generateTTS = async (text: string) => {
-        setLoading(true);
-        setIsPlaying(false);
-
-        const mediaSource = new MediaSource();
-        let sourceBuffer: SourceBuffer;
-
-        mediaSource.addEventListener('sourceopen', () => {
-            // // Clean up any existing SourceBuffer if necessary
-            // if (sourceBuffer) {
-            //     // We should only have one SourceBuffer, but ensure old ones are cleaned up
-            //     const buffers = mediaSource.sourceBuffers;
-            //     for (let i = buffers.length - 1; i >= 0; i--) {
-            //         mediaSource.removeSourceBuffer(buffers[i]);
-            //     }
-            // }
-
-            // Add new SourceBuffer
-            if (!sourceBuffer) {
-                sourceBuffer = mediaSource.addSourceBuffer('audio/webm; codecs="opus"');
-            }
-        });
-
-        const audio = new Audio();
-        setAudioElement(audio);
-        audio.src = URL.createObjectURL(mediaSource);
-        audio.oncanplay = () => {
-            const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-            const analyserNode = audioContext.createAnalyser();
-
-            analyserNode.fftSize = 2048;
-            analyserNode.minDecibels = -160;
-            analyserNode.maxDecibels = -20;
-
-            const source = audioContext.createMediaElementSource(audio);
-            source.connect(analyserNode);
-            analyserNode.connect(audioContext.destination);
-
-            analyserRef.current = analyserNode;
-
-            audio.play();
-            setIsPlaying(true);
-        };
-
-        audio.onended = () => {
-            setIsPlaying(false);
-        };
-
+    const fetchAudio = async (text: string): Promise<ArrayBuffer | null> => {
+        console.log('Fetching audio: ' + text);
         const response = await fetch('/api/tts', {
             method: 'POST',
             headers: {
@@ -105,84 +62,94 @@ const TTS = forwardRef((props: TTSProps, ref) => {
         });
 
         if (response.ok) {
-            const reader = response.body?.getReader();
-            if (!reader) {
-                console.error("Failed to get reader from response body.");
-                setLoading(false);
-                return;
+            return await response.arrayBuffer();
+        } else {
+            console.error("Failed to generate TTS");
+            return null;
+        }
+    };
+
+    const processQueue = async () => {
+        if (queue.length > 0 && !isPlaying) {
+            const nextItem = queue[0];
+            setQueue(queue.slice(1)); 
+            if (nextItem.audioBuffer) {
+                console.log('Playing: ' + nextItem.text);
+                await playAudio(nextItem.audioBuffer);
             }
+        }
+    };
 
-            const pump = async () => {
-                if (!reader || !sourceBuffer) return;
+    const playAudio = async (audioBuffer: ArrayBuffer): Promise<void> => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                setIsPlaying(false);
 
-                const chunkQueue: Uint8Array[] = [];
+                const mediaSource = new MediaSource();
+                let sourceBuffer: SourceBuffer;
 
-                const appendNextChunk = async () => {
-                    if (chunkQueue.length === 0) return;
-
-                    if (!sourceBuffer.updating) {
-                        const chunk = chunkQueue.shift();
-                        if (chunk) {
-                            sourceBuffer.appendBuffer(chunk);
-                        }
-                    }
-
-                    if (chunkQueue.length > 0) {
-                        // Keep checking if we can append the next chunk
-                        await new Promise(resolve => {
-                            sourceBuffer.addEventListener('updateend', resolve, { once: true });
+                mediaSource.addEventListener('sourceopen', () => {
+                    try {
+                        sourceBuffer = mediaSource.addSourceBuffer('audio/webm; codecs="opus"');
+                        sourceBuffer.appendBuffer(audioBuffer);
+                        sourceBuffer.addEventListener('updateend', () => {
+                            mediaSource.endOfStream();
                         });
-                        appendNextChunk();
+                    } catch (err) {
+                        console.error("Error during source buffer setup:", err);
+                        reject(err);
+                    }
+                });
+
+                const audio = new Audio();
+                audio.src = URL.createObjectURL(mediaSource);
+
+                audio.oncanplay = () => {
+                    try {
+                        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+                        const analyserNode = audioContext.createAnalyser();
+
+                        analyserNode.fftSize = 2048;
+                        analyserNode.minDecibels = -160;
+                        analyserNode.maxDecibels = -20;
+
+                        const source = audioContext.createMediaElementSource(audio);
+                        source.connect(analyserNode);
+                        analyserNode.connect(audioContext.destination);
+
+                        analyserRef.current = analyserNode;
+
+                        audio.play();
+                        setIsPlaying(true);
+                    } catch (err) {
+                        console.error("Error during audio playback setup:", err);
+                        reject(err);
                     }
                 };
 
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) {
-                        if (!sourceBuffer.updating) {
-                            mediaSource.endOfStream();
-                        }
-                        break;
-                    }
+                audio.onended = () => {
+                    setIsPlaying(false);
+                    resolve();
+                };
 
-                    chunkQueue.push(value);
-                    appendNextChunk();
-                }
-            };
-
-
-            // const pump = async () => {
-            //     while (true) {
-            //         const { done, value } = await reader.read();
-            //         if (done) {
-            //             if (sourceBuffer.updating) {
-            //                 await new Promise(resolve => {
-            //                     sourceBuffer.addEventListener('updateend', resolve, { once: true });
-            //                 });
-            //             }
-            //             mediaSource.endOfStream();
-            //             break;
-            //         }
-
-            //         if (sourceBuffer.updating) {
-            //             await new Promise(resolve => {
-            //                 sourceBuffer.addEventListener('updateend', resolve, { once: true });
-            //             });
-            //         }
-            //         sourceBuffer.appendBuffer(value);
-            //     }
-            // };
-
-            await pump();
-        } else {
-            console.error("Failed to generate TTS");
-        }
-
-        setLoading(false);
+                audio.onerror = (err) => {
+                    console.error("Audio playback error:", err);
+                    reject(err);
+                };
+            } catch (err) {
+                console.error("Error during playAudio setup:", err);
+                reject(err);
+            }
+        });
     };
 
     useImperativeHandle(ref, () => ({
-        generateTTS,
+        generateTTS: async (text: string) => {
+            setLoading(true);
+            const audioBuffer = await fetchAudio(text);
+            setQueue(prevQueue => [...prevQueue, { text, audioBuffer }]);
+            setLoading(false);
+        },
         getTTSLoadingStatus: () => {
             return loading;
         },
@@ -208,11 +175,13 @@ const TTS = forwardRef((props: TTSProps, ref) => {
         }
     }));
 
-
     useEffect(() => {
         props.onPlayingStatusChange(isPlaying);
-      }, [isPlaying]);
+    }, [isPlaying]);
 
+    useEffect(() => {
+        processQueue();
+    }, [isPlaying, queue]);
 
     const drawWaveform = () => {
         const canvas = canvasRef.current;

@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^0.0.55",
     "@hookform/resolvers": "^3.9.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
     "@radix-ui/react-avatar": "^1.0.4",
@@ -32,7 +33,7 @@
     "@radix-ui/react-tooltip": "^1.1.2",
     "@supabase/ssr": "^0.5.0",
     "@supabase/supabase-js": "^2.45.1",
-    "ai": "^3.2.16",
+    "ai": "^3.3.26",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
