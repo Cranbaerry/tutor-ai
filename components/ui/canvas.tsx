@@ -137,15 +137,14 @@ function Canvas(props: CanvasProps) {
     };
   }, []);
 
-  // Define cursor styles based on the tool
   const getCursorStyle = () => {
     switch (tool) {
       case 'pencil':
-        return 'crosshair'; // Crosshair for drawing
+        return 'crosshair'; 
       case 'eraser':
-        return 'not-allowed'; // 'not-allowed' icon for eraser
+        return 'not-allowed';
       case 'drag':
-        return 'grab'; // Hand for dragging
+        return 'grab'; 
       default:
         return 'default';
     }
