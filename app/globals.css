@@ -80,7 +80,7 @@
     height: 100%;
   }
 
-  .mic-indicator {
+  .text-helper {
     display: flex;
     align-items: center;
     justify-content: center;

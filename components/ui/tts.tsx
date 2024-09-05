@@ -1,24 +1,49 @@
 'use client';
-import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle, useCallback } from 'react';
+import { useTaskQueue, TaskQueue, TaskRunner } from '@/hooks/use-task-queue';
 interface TTSProps {
     width?: number;
     height?: number;
     onPlayingStatusChange: (status: boolean) => void;
+    onReadingTextChange: (text: string) => void;
 }
 
 interface TTSQueueItem {
+    id: number,
     text: string;
-    audioBuffer: ArrayBuffer | null;
+    audioBuffer: Promise<ArrayBuffer | null>;
+}
+
+interface TTSQueueResult {
+    status: boolean
 }
 
 const TTS = forwardRef((props: TTSProps, ref) => {
     const { width = 400, height = 200 } = props;
     const [loading, setLoading] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
-    const [queue, setQueue] = useState<TTSQueueItem[]>([]);
-    const isProcessingQueue = useRef(false);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const analyserRef = useRef<AnalyserNode | null>(null);
+    const [readingText, setReadingText] = useState<string>('');
+
+    const ttsQueueRunner: TaskRunner<TTSQueueItem, TTSQueueResult> = useCallback((task: TTSQueueItem) => {
+        return new Promise<TTSQueueResult>(async (resolve, reject) => {
+            var audioBuffer = await task.audioBuffer;
+            if (audioBuffer) {
+                console.log('Playing:', task.text);
+                setReadingText(task.text);
+                await playAudio(audioBuffer);
+                resolve({ status: true });
+            } else {
+                console.log('Error on playing:', task.text);
+                reject({ status: false });
+            }
+        })
+    }, []);
+
+    const ttsQueue = useRef(new TaskQueue<TTSQueueItem, TTSQueueResult>(ttsQueueRunner)).current
+    const ttsQueueSequence = useRef(0);
+    const { add, currentTask, error, queuedTasks, clear, resume } = useTaskQueue(ttsQueue);
 
     const drawBar = (ctx: CanvasRenderingContext2D, x: number, barHeight: number, radii: number) => {
         ctx.beginPath();
@@ -53,13 +78,13 @@ const TTS = forwardRef((props: TTSProps, ref) => {
     };
 
     const fetchAudio = async (text: string): Promise<ArrayBuffer | null> => {
-        console.log('Fetching audio: ' + text);
+        console.log('Fetching audio: %s', text);
         const response = await fetch('/api/tts', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ text: text, voiceName: "en-US-MichelleNeural" }),
+            body: JSON.stringify({ text: text }),
         });
 
         if (response.ok) {
@@ -67,20 +92,6 @@ const TTS = forwardRef((props: TTSProps, ref) => {
         } else {
             console.error("Failed to generate TTS");
             return null;
-        }
-    };
-
-    const processQueue = async () => {
-        if (isProcessingQueue.current) return; 
-        if (queue.length > 0 && !isPlaying) {
-            isProcessingQueue.current = true;
-            const nextItem = queue[0];
-            setQueue(queue.slice(1)); 
-            if (nextItem.audioBuffer) {
-                console.log('Playing: ' + nextItem.text);
-                await playAudio(nextItem.audioBuffer);
-            }
-            isProcessingQueue.current = false;
         }
     };
 
@@ -150,8 +161,16 @@ const TTS = forwardRef((props: TTSProps, ref) => {
     useImperativeHandle(ref, () => ({
         generateTTS: async (text: string) => {
             setLoading(true);
-            const audioBuffer = await fetchAudio(text);
-            setQueue(prevQueue => [...prevQueue, { text, audioBuffer }]);
+            const newTask: TTSQueueItem = {
+                id: ++ttsQueueSequence.current,
+                text: text,
+                audioBuffer: fetchAudio(text), 
+              };
+
+            add(newTask).then(() => {
+               setReadingText('');
+            });
+            console.log('New task queued: %d', newTask.id);
             setLoading(false);
         },
         getTTSLoadingStatus: () => {
@@ -161,11 +180,10 @@ const TTS = forwardRef((props: TTSProps, ref) => {
             return isPlaying;
         },
         getTTSQueueCount: () => {
-            return queue.length;
+            return queuedTasks.length;
         },
         clearTTSQueue: () => {
-            console.log('Clear queue');
-            setQueue([]);
+            clear();
         },
         startExternalAudioVisualization: (stream: MediaStream) => {
             if (analyserRef.current) {
@@ -187,12 +205,12 @@ const TTS = forwardRef((props: TTSProps, ref) => {
     }));
 
     useEffect(() => {
-        props.onPlayingStatusChange(isPlaying);
-    }, [isPlaying]);
+        props.onReadingTextChange(readingText);
+    }, [readingText]);
 
     useEffect(() => {
-        processQueue();
-    }, [isPlaying, queue]);
+        props.onPlayingStatusChange(isPlaying);
+    }, [isPlaying]);
 
     const drawWaveform = () => {
         const canvas = canvasRef.current;

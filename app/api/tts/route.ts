@@ -2,8 +2,9 @@ import { NextResponse } from 'next/server';
 import { MsEdgeTTS, OUTPUT_FORMAT } from 'msedge-tts';
 
 export async function POST(req: Request) {
-    const { text, voiceName } = await req.json();
+    const { text } = await req.json();
     const tts = new MsEdgeTTS();
+    const voiceName = process.env.NEXT_PUBLIC_AZURE_SPEECH_SERVICE_VOICE_NAME ?? 'en-US-MichelleNeural';
     await tts.setMetadata(voiceName, OUTPUT_FORMAT.WEBM_24KHZ_16BIT_MONO_OPUS);
 
     const readable = tts.toStream(text);

@@ -1,6 +1,5 @@
 'use client';
 import React, { useRef, useEffect, useState } from "react";
-import { MicIndicator } from "@/components/ui/mic-indicator";
 import 'regenerator-runtime/runtime';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import {
@@ -25,7 +24,7 @@ export default function Playground() {
     const { messages, input, handleInputChange, handleSubmit, append } = useChat();
     const [messageBuffer, setMessageBuffer] = useState<string>('');
     const [messageBufferRead, setMessageBufferRead] = useState<string>('');
-    // const [readMessage, setReadMessage] = useState<string>(''); //
+    const [currentlyPlayingTTSText, setCurrentlyPlayingTTSText] = useState<string>('');
     const canvasRef = useRef<any>(null);
     const ttsRef = useRef<{
         generateTTS: (text: string) => void;
@@ -37,7 +36,7 @@ export default function Playground() {
     }>();
 
     const [pauseTimer, setPauseTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
-    const [status, setStatus] = useState<'Listening' | 'Speak to interrupt'>('Listening');
+    const [status, setStatus] = useState<'Listening' | 'Speak to interrupt' | 'Processing'>('Listening');
     const [activeStream, setActiveStream] = useState<'user' | 'bot' | null>('user');
     const {
         transcript,
@@ -49,18 +48,20 @@ export default function Playground() {
     } = useSpeechRecognition();
 
     const sendTranscript = async () => {
-        if (finalTranscript.trim() !== '') {            
-            console.log('Sending transcript:  ', finalTranscript);
-            // await ttsRef.current?.generateTTS('Testing');
-            // await ttsRef.current?.generateTTS('I am testing');
+        if (finalTranscript.trim() !== '') {
+            setStatus('Processing');
+            console.log('Sending transcript:', finalTranscript);
             append({
                 role: "user",
                 content: finalTranscript.trim(),
             });
             if (ttsRef.current) ttsRef.current.clearTTSQueue();
-            //ttsRef.current?.generateTTS('In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document or a typeface without relying on meaningful content. Lorem ipsum may be used as a placeholder before the final copy is available');
         }
     };
+
+    const processMessageBuffer = (messageBuffer: string) => {
+
+    }
 
     const resetPauseTimer = () => {
         if (pauseTimer) {
@@ -93,7 +94,7 @@ export default function Playground() {
     useEffect(() => {
         if (messageBuffer.length > 0) {
             const currentMessage = messageBuffer.replace(messageBufferRead, '');
-            const sentences = currentMessage.match(/[^.!?]+[.!?]*|\d+\./g) || [];
+            const sentences = currentMessage.match(/\d+\.\s+[^.?!]+(?:[.?!]+|$)|[^.?!]+[.?!]+/g) || [];
             setMessageBufferRead(messageBuffer);
 
             sentences.forEach((sentence) => {
@@ -103,10 +104,8 @@ export default function Playground() {
                     ttsRef.current.generateTTS(trimmedSentence);
                 }
             });
-
         }
     }, [messageBuffer]);
-
 
     useEffect(() => {
         SpeechRecognition.startListening({ continuous: true, interimResults: true });
@@ -139,7 +138,7 @@ export default function Playground() {
     }, [transcript]);
 
     useEffect(() => {
-        console.log('activeStream changed: ' + activeStream);
+        console.log('activeStream changed:', activeStream);
     }, [activeStream]);
 
     const handleTTSPlayingStatusChange = (status: boolean) => {
@@ -149,6 +148,10 @@ export default function Playground() {
         } else if (tts && tts?.getTTSQueueCount() === 0) {
             setActiveStream('user');
         }
+    };
+
+    const handleTTSOnReadingTextChange = (text: string) => {
+        setCurrentlyPlayingTTSText(text);
     };
 
     return (
@@ -187,9 +190,11 @@ export default function Playground() {
 
             <Canvas backgroundColor={'rgb(250 250 250 / 1)'} canvasRef={canvasRef} />
             <div className="fixed flex bottom-8 left-24 items-center space-x-2">
-                <TTS ref={ttsRef} width={50} height={40} onPlayingStatusChange={handleTTSPlayingStatusChange} />
+                <TTS ref={ttsRef} width={50} height={40} onPlayingStatusChange={handleTTSPlayingStatusChange} onReadingTextChange={handleTTSOnReadingTextChange} />
                 <Badge>{status}</Badge>
-                <MicIndicator listening={listening} transcript={transcript} />
+                <div className="text-helper">
+                    <span className="status mx-1">{activeStream === 'user' ? transcript : currentlyPlayingTTSText}</span>
+                </div>
             </div>
         </>
     );
