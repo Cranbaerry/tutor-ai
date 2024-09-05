@@ -16,11 +16,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { ColorPicker } from "@/components/ui/color-picker"
 
 function Canvas(props: CanvasProps) {
   const stageParentRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
-  const [tool, setTool] = useState<'pencil' | 'eraser' | 'drag'>('pencil')
+  const [tool, setTool] = useState<'pencil' | 'eraser' | 'drag'>('pencil');
   const [lines, setLines] = useState<LineData[]>([]);
   const isDrawing = useRef<boolean>(false);
   const [dimensions, setDimensions] = useState<{ width: number; height: number }>({
@@ -28,12 +29,10 @@ function Canvas(props: CanvasProps) {
     height: 0
   });
   const [showPlaceholder, setShowPlaceholder] = useState<boolean>(true);
-
-  // TODO: clean up later
-  const [color, setColor] = useState('#000000');
+  const colorRef = useRef<string>('#000');
   const [strokeWidth, setStrokeWidth] = useState(5);
   const [scale, setScale] = useState(1);
-  const [history, setHistory] = useState<ImageData[]>([]);
+  const [history, setHistory] = useState<LineData[][]>([]);
   const [historyStep, setHistoryStep] = useState(-1);
 
   useImperativeHandle(props.canvasRef, () => ({
@@ -48,7 +47,6 @@ function Canvas(props: CanvasProps) {
     }
   };
 
-
   const handleRedo = () => {
     if (historyStep < history.length - 1) {
       const newStep = historyStep + 1;
@@ -58,14 +56,12 @@ function Canvas(props: CanvasProps) {
   };
 
   const handleZoomIn = () => {
-    setScale(prevScale => Math.min(prevScale + 0.1, 3)); // Cap zoom in at 3x
+    setScale(prevScale => Math.min(prevScale + 0.1, 3));
   };
-
 
   const handleZoomOut = () => {
-    setScale(prevScale => Math.max(prevScale - 0.1, 0.5)); // Cap zoom out at 0.5x
+    setScale(prevScale => Math.max(prevScale - 0.1, 0.5));
   };
-
 
   const handleExport = () => {
     if (stageRef.current) {
@@ -87,10 +83,10 @@ function Canvas(props: CanvasProps) {
       x: (pos.x - stage.x()) / scale,
       y: (pos.y - stage.y()) / scale,
     };
-  
-    setLines(prevLines => [...prevLines, { tool, points: [adjustedPos.x, adjustedPos.y] }]);
-  };
 
+    // Store the current color in the line data
+    setLines(prevLines => [...prevLines, { tool, points: [adjustedPos.x, adjustedPos.y], color: colorRef.current }]);
+  };
 
   const handleMouseMove = (e: KonvaEventObject<MouseEvent>) => {
     if (tool === 'drag') return;
@@ -112,7 +108,6 @@ function Canvas(props: CanvasProps) {
     });
   };
 
-
   const handleMouseUp = () => {
     if (tool === 'drag') return;
     isDrawing.current = false;
@@ -120,7 +115,6 @@ function Canvas(props: CanvasProps) {
     setHistory([...newHistory, lines]);
     setHistoryStep(newHistory.length);
   };
-
 
   const handleResize = () => {
     var container = stageParentRef.current;
@@ -131,6 +125,10 @@ function Canvas(props: CanvasProps) {
     });
   };
 
+  const handleColorChange = (e: string) => {
+    colorRef.current = e;
+  };
+
   useEffect(() => {
     handleResize();
     window.addEventListener('resize', handleResize);
@@ -138,6 +136,20 @@ function Canvas(props: CanvasProps) {
       window.removeEventListener('resize', handleResize);
     };
   }, []);
+
+  // Define cursor styles based on the tool
+  const getCursorStyle = () => {
+    switch (tool) {
+      case 'pencil':
+        return 'crosshair'; // Crosshair for drawing
+      case 'eraser':
+        return 'not-allowed'; // 'not-allowed' icon for eraser
+      case 'drag':
+        return 'grab'; // Hand for dragging
+      default:
+        return 'default';
+    }
+  };
 
   function TooltipWrapper({ content, children }: { content: string; children: React.ReactNode }) {
     return (
@@ -149,6 +161,7 @@ function Canvas(props: CanvasProps) {
       </Tooltip>
     )
   }
+
   return (
     <TooltipProvider>
       <Card className="h-full">
@@ -161,7 +174,7 @@ function Canvas(props: CanvasProps) {
                 size="icon"
                 className="w-full"
               >
-                <HandIcon className="h-4 w-4" /> {/* Replace with a relevant drag icon */}
+                <HandIcon className="h-4 w-4" />
               </Button>
             </TooltipWrapper>
             <TooltipWrapper content="Pencil">
@@ -187,12 +200,7 @@ function Canvas(props: CanvasProps) {
             <Separator className="my-2" />
             <TooltipWrapper content="Color">
               <div className="flex justify-center">
-                <input
-                  type="color"
-                  value={color}
-                  onChange={(e) => setColor(e.target.value)}
-                  className="w-8 h-8 rounded-full overflow-hidden"
-                />
+                <ColorPicker color={colorRef.current} onChange={handleColorChange} />
               </div>
             </TooltipWrapper>
             <Separator className="my-2" />
@@ -251,7 +259,7 @@ function Canvas(props: CanvasProps) {
                 scaleX={scale}
                 scaleY={scale}
                 draggable={tool === 'drag'}
-                style={{ backgroundColor: props.backgroundColor, borderColor: "#e4e4e7" }}
+                style={{ backgroundColor: props.backgroundColor, borderColor: "#e4e4e7", cursor: getCursorStyle() }} // Dynamically set cursor
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
@@ -261,7 +269,7 @@ function Canvas(props: CanvasProps) {
                     <Line
                       key={i}
                       points={line.points}
-                      stroke="#000"
+                      stroke={line.color}
                       strokeWidth={strokeWidth / scale}
                       tension={0.5}
                       lineCap="round"

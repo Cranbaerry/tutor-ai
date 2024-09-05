@@ -11,4 +11,5 @@ export type CanvasWrapperProps = {
 export type LineData = {
   tool: string;
   points: number[];
+  color: string;
 }

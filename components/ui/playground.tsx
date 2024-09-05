@@ -59,10 +59,6 @@ export default function Playground() {
         }
     };
 
-    const processMessageBuffer = (messageBuffer: string) => {
-
-    }
-
     const resetPauseTimer = () => {
         if (pauseTimer) {
             clearTimeout(pauseTimer);
