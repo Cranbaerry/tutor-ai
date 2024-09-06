@@ -1,4 +1,4 @@
-import { Stage, Layer, Line, Text } from 'react-konva';
+import { Stage, Layer, Line, Text, Rect } from 'react-konva';
 import React, { useEffect, useRef, useState, useImperativeHandle } from "react";
 import { KonvaEventObject } from 'konva/lib/Node';
 import { CanvasProps, LineData } from '@/lib/definitions';
@@ -140,11 +140,11 @@ function Canvas(props: CanvasProps) {
   const getCursorStyle = () => {
     switch (tool) {
       case 'pencil':
-        return 'crosshair'; 
+        return 'crosshair';
       case 'eraser':
         return 'not-allowed';
       case 'drag':
-        return 'grab'; 
+        return 'grab';
       default:
         return 'default';
     }
@@ -264,6 +264,14 @@ function Canvas(props: CanvasProps) {
                 onMouseUp={handleMouseUp}
               >
                 <Layer>
+                  <Rect
+                    x={0}
+                    y={0}
+                    width={dimensions.width}
+                    height={dimensions.height}
+                    listening={false}
+                    fill={"#FAFAFA"}
+                  />
                   {lines.map((line, i) => (
                     <Line
                       key={i}

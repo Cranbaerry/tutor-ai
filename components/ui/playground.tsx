@@ -14,18 +14,28 @@ import {
 import { TTS } from "@/components/ui/tts"
 import dynamic from 'next/dynamic';
 import { Badge } from "@/components/ui/badge"
-import { useChat } from 'ai/react';
+import { CreateMessage, Message, useChat } from 'ai/react';
+import { ChatRequestOptions, JSONValue } from "ai";
 
 const Canvas = dynamic(() => import('@/components/ui/canvas'), {
     ssr: false,
 });
 
 export default function Playground() {
-    const { messages, input, handleInputChange, handleSubmit, append } = useChat();
+    const { messages, input, handleInputChange, handleSubmit, append } = useChat({
+        onFinish: (message:Message) => {
+            if (!/[.!?:]$/.test(message.content)) {
+                console.log('onFinish special case:', message.content);
+                setMessageBuffer(message.content);
+            }
+        },
+      });
     const [messageBuffer, setMessageBuffer] = useState<string>('');
     const [messageBufferRead, setMessageBufferRead] = useState<string>('');
     const [currentlyPlayingTTSText, setCurrentlyPlayingTTSText] = useState<string>('');
-    const canvasRef = useRef<any>(null);
+    const canvasRef = useRef<{
+        handleExport: () => string;
+    }>(null);
     const ttsRef = useRef<{
         generateTTS: (text: string) => void;
         getTTSLoadingStatus: () => boolean;
@@ -50,11 +60,18 @@ export default function Playground() {
     const sendTranscript = async () => {
         if (finalTranscript.trim() !== '') {
             setStatus('Processing');
-            console.log('Sending transcript:', finalTranscript);
-            append({
+            const canvasDataUrl = canvasRef.current?.handleExport();
+            const message: CreateMessage = {
                 role: "user",
                 content: finalTranscript.trim(),
-            });
+            };
+
+            const options: ChatRequestOptions = {
+                data: { imageUrl: canvasDataUrl as JSONValue },
+            };
+
+            console.log('Sending transcript:', finalTranscript);
+            append(message, canvasDataUrl ? options : undefined);
             if (ttsRef.current) ttsRef.current.clearTTSQueue();
         }
     };
@@ -68,7 +85,6 @@ export default function Playground() {
             resetTranscript();
         }, 2000));
     };
-
     useEffect(() => {
         if (finalTranscript) {
             resetPauseTimer();
@@ -80,6 +96,7 @@ export default function Playground() {
             const latestMessage = messages[messages.length - 1];
             const content = latestMessage.content;
             if (latestMessage?.role === 'assistant') {
+                console.log('content', content);
                 if (content && /[.!?:]$/.test(content)) {
                     setMessageBuffer(content);
                 }
@@ -90,7 +107,7 @@ export default function Playground() {
     useEffect(() => {
         if (messageBuffer.length > 0) {
             const currentMessage = messageBuffer.replace(messageBufferRead, '');
-            const sentences = currentMessage.match(/\d+\.\s+[^.?!]+(?:[.?!]+|$)|[^.?!]+[.?!]+/g) || [];
+            const sentences = currentMessage.match(/[^.!?]+[.!?]+/g) || [];
             setMessageBufferRead(messageBuffer);
 
             sentences.forEach((sentence) => {
@@ -147,7 +164,7 @@ export default function Playground() {
     };
 
     const handleTTSOnReadingTextChange = (text: string) => {
-        setCurrentlyPlayingTTSText(text);
+        setCurrentlyPlayingTTSText(text.trim());
     };
 
     return (
@@ -184,7 +201,7 @@ export default function Playground() {
                 </AlertDialog>
             }
 
-            <Canvas backgroundColor={'rgb(250 250 250 / 1)'} canvasRef={canvasRef} />
+            <Canvas backgroundColor={'#FAFAFA)'} canvasRef={canvasRef} />
             <div className="fixed flex bottom-8 left-24 items-center space-x-2">
                 <TTS ref={ttsRef} width={50} height={40} onPlayingStatusChange={handleTTSPlayingStatusChange} onReadingTextChange={handleTTSOnReadingTextChange} />
                 <Badge>{status}</Badge>
