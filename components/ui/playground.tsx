@@ -96,7 +96,7 @@ export default function Playground() {
             const latestMessage = messages[messages.length - 1];
             const content = latestMessage.content;
             if (latestMessage?.role === 'assistant') {
-                console.log('content', content);
+                // console.log('content', content);
                 if (content && /[.!?:]$/.test(content)) {
                     setMessageBuffer(content);
                 }
@@ -136,6 +136,7 @@ export default function Playground() {
             setStatus('Listening');
             navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
                 if (ttsRef.current) {
+                    ttsRef.current.clearTTSQueue();
                     ttsRef.current.startExternalAudioVisualization(stream);
                 }
             });
@@ -156,6 +157,7 @@ export default function Playground() {
 
     const handleTTSPlayingStatusChange = (status: boolean) => {
         const tts = ttsRef.current;
+        if (tts) console.log('ttsStatus: %s, queue count: %d', status,  tts?.getTTSQueueCount())
         if (status) {
             setActiveStream('bot');
         } else if (tts && tts?.getTTSQueueCount() === 0) {

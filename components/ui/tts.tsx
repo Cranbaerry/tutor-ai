@@ -11,7 +11,7 @@ interface TTSProps {
 interface TTSQueueItem {
     id: number,
     text: string;
-    audioBuffer: Promise<ArrayBuffer | null>;
+    audioBuffer: Promise<ReadableStream<Uint8Array> | null>;
 }
 
 interface TTSQueueResult {
@@ -28,21 +28,22 @@ const TTS = forwardRef((props: TTSProps, ref) => {
 
     const ttsQueueRunner: TaskRunner<TTSQueueItem, TTSQueueResult> = useCallback((task: TTSQueueItem) => {
         return new Promise<TTSQueueResult>(async (resolve, reject) => {
-            var audioBuffer = await task.audioBuffer;
-            if (audioBuffer) {
+            var audioStream = await task.audioBuffer;            
+            if (audioStream) {
                 console.log('Playing:', task.text);
                 setReadingText(task.text);
-                await playAudio(audioBuffer);
+                await playAudio(audioStream);
                 resolve({ status: true });
             } else {
                 console.log('Error on playing:', task.text);
                 reject({ status: false });
             }
-        })
-    }, []);
+        });
+    }, []);    
 
     const ttsQueue = useRef(new TaskQueue<TTSQueueItem, TTSQueueResult>(ttsQueueRunner)).current
     const ttsQueueSequence = useRef(0);
+    const ttsQueueSequenceInterim = useRef(0);
     const { add, currentTask, error, queuedTasks, clear, resume } = useTaskQueue(ttsQueue);
 
     const drawBar = (ctx: CanvasRenderingContext2D, x: number, barHeight: number, radii: number) => {
@@ -77,7 +78,7 @@ const TTS = forwardRef((props: TTSProps, ref) => {
         }
     };
 
-    const fetchAudio = async (text: string): Promise<ArrayBuffer | null> => {
+    const fetchAudio = async (text: string): Promise<ReadableStream<Uint8Array> | null> => {
         console.log('Fetching audio: %s', text);
         const response = await fetch('/api/tts', {
             method: 'POST',
@@ -86,54 +87,84 @@ const TTS = forwardRef((props: TTSProps, ref) => {
             },
             body: JSON.stringify({ text: text }),
         });
-
+    
         if (response.ok) {
-            return await response.arrayBuffer();
+            return response.body; // Return the streaming body
         } else {
             console.error("Failed to generate TTS");
             return null;
         }
     };
-
-    const playAudio = async (audioBuffer: ArrayBuffer): Promise<void> => {
+    
+    const playAudio = async (audioStream: ReadableStream<Uint8Array>): Promise<void> => {
         return new Promise(async (resolve, reject) => {
             try {
                 setIsPlaying(false);
-
+    
                 const mediaSource = new MediaSource();
                 let sourceBuffer: SourceBuffer;
-
-                mediaSource.addEventListener('sourceopen', () => {
+                let streamEnded = false;  // Flag to check if the stream has ended
+    
+                mediaSource.addEventListener('sourceopen', async () => {
                     try {
                         sourceBuffer = mediaSource.addSourceBuffer('audio/webm; codecs="opus"');
-                        sourceBuffer.appendBuffer(audioBuffer);
-                        sourceBuffer.addEventListener('updateend', () => {
-                            mediaSource.endOfStream();
-                        });
+                        
+                        // Stream the audio progressively
+                        const reader = audioStream.getReader();
+                        let done = false;
+                        console.log('Start streaming audio');
+                        const processNextChunk = async () => {
+                            const { value, done: streamDone } = await reader.read();
+                            if (value) {
+                                if (!sourceBuffer.updating) {
+                                    sourceBuffer.appendBuffer(value);  // Append the chunk
+                                } else {
+                                    // Wait for the buffer to be ready
+                                    await new Promise((resolve) => {
+                                        sourceBuffer.addEventListener('updateend', resolve, { once: true });
+                                    });
+                                    sourceBuffer.appendBuffer(value);
+                                }
+                            }
+                            if (streamDone) {
+                                streamEnded = true;
+                                if (!sourceBuffer.updating) {
+                                    mediaSource.endOfStream();
+                                } else {
+                                    sourceBuffer.addEventListener('updateend', () => {
+                                        mediaSource.endOfStream();
+                                    }, { once: true });
+                                }
+                                return;
+                            }
+                            sourceBuffer.addEventListener('updateend', processNextChunk, { once: true });
+                        };
+                        processNextChunk();
+                        console.log('End streaming audio');
                     } catch (err) {
                         console.error("Error during source buffer setup:", err);
                         reject(err);
                     }
                 });
-
+    
                 const audio = new Audio();
                 audio.src = URL.createObjectURL(mediaSource);
-
+    
                 audio.oncanplay = () => {
                     try {
                         const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
                         const analyserNode = audioContext.createAnalyser();
-
+    
                         analyserNode.fftSize = 2048;
                         analyserNode.minDecibels = -160;
                         analyserNode.maxDecibels = -20;
-
+    
                         const source = audioContext.createMediaElementSource(audio);
                         source.connect(analyserNode);
                         analyserNode.connect(audioContext.destination);
-
+    
                         analyserRef.current = analyserNode;
-
+    
                         audio.play();
                         setIsPlaying(true);
                     } catch (err) {
@@ -141,12 +172,12 @@ const TTS = forwardRef((props: TTSProps, ref) => {
                         reject(err);
                     }
                 };
-
+    
                 audio.onended = () => {
                     setIsPlaying(false);
                     resolve();
                 };
-
+    
                 audio.onerror = (err) => {
                     console.error("Audio playback error:", err);
                     reject(err);
@@ -157,7 +188,7 @@ const TTS = forwardRef((props: TTSProps, ref) => {
             }
         });
     };
-
+    
     useImperativeHandle(ref, () => ({
         generateTTS: async (text: string) => {
             setLoading(true);
@@ -165,12 +196,17 @@ const TTS = forwardRef((props: TTSProps, ref) => {
                 id: ++ttsQueueSequence.current,
                 text: text,
                 audioBuffer: fetchAudio(text), 
-              };
+            };
 
+            ++ttsQueueSequenceInterim.current;
             add(newTask).then(() => {
-               setReadingText('');
+                setReadingText('');                
+            }).catch(err => {
+                console.warn("Problem adding new audio queue task, user may have interrupted the bot..");
+            }).finally(() => {
+                --ttsQueueSequenceInterim.current;
             });
-            console.log('New task queued: %d', newTask.id);
+                        
             setLoading(false);
         },
         getTTSLoadingStatus: () => {
@@ -180,10 +216,11 @@ const TTS = forwardRef((props: TTSProps, ref) => {
             return isPlaying;
         },
         getTTSQueueCount: () => {
-            return queuedTasks.length;
+            return ttsQueueSequenceInterim.current;
         },
         clearTTSQueue: () => {
             clear();
+            console.log('Clear queue: ', queuedTasks.length);
         },
         startExternalAudioVisualization: (stream: MediaStream) => {
             if (analyserRef.current) {
