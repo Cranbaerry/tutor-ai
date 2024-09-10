@@ -7,8 +7,6 @@ export async function POST(req: Request) {
     const initialMessages = messages.slice(0, -1);
     const currentMessage = messages[messages.length - 1];
 
-    console.log(messages);
-
     const result = await streamText({
         model: openai(process.env.OPENAI_GPT_MODEL ?? 'gpt-4o-mini'),
         system: process.env.OPENAI_GPT_PROMPT,

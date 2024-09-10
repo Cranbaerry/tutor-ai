@@ -67,11 +67,7 @@ export class TaskQueue<T, R = void> {
         this._abortController = new AbortController();
 
         this._queuedTasks.forEach((task) => {
-            try {
-                task.reject();
-            } catch (err) {
-                console.error("Error rejecting audio queue:", err);
-            }
+            task.reject();
         });
 
         this._queuedTasks = [];

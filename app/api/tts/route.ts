@@ -1,10 +1,11 @@
-import { NextResponse } from 'next/server';
 import { MsEdgeTTS, OUTPUT_FORMAT } from 'msedge-tts';
 
 export async function POST(req: Request) {
-    const { text } = await req.json();
+    const { text, language } = await req.json();
     const tts = new MsEdgeTTS();
-    const voiceName = process.env.NEXT_PUBLIC_AZURE_SPEECH_SERVICE_VOICE_NAME ?? 'en-US-MichelleNeural';
+
+    // VOICE LIST: https://gist.github.com/BettyJJ/17cbaa1de96235a7f5773b8690a20462
+    const voiceName = process.env[`AZURE_SPEECH_SERVICE_${language}`] ?? 'en-US-JennyNeural';
     await tts.setMetadata(voiceName, OUTPUT_FORMAT.WEBM_24KHZ_16BIT_MONO_OPUS);
 
     const readable = tts.toStream(text);
@@ -24,7 +25,7 @@ export async function POST(req: Request) {
         },
     });
 
-    return new NextResponse(stream, {
+    return new Response(stream, {
         headers: {
             'Content-Type': 'audio/webm',
         },

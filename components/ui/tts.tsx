@@ -25,6 +25,7 @@ const TTS = forwardRef((props: TTSProps, ref) => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const analyserRef = useRef<AnalyserNode | null>(null);
     const [readingText, setReadingText] = useState<string>('');
+    const currentAudioRef = useRef<HTMLAudioElement | null>(null);
 
     const ttsQueueRunner: TaskRunner<TTSQueueItem, TTSQueueResult> = useCallback((task: TTSQueueItem) => {
         return new Promise<TTSQueueResult>(async (resolve, reject) => {
@@ -35,7 +36,7 @@ const TTS = forwardRef((props: TTSProps, ref) => {
                 await playAudio(audioStream);
                 resolve({ status: true });
             } else {
-                console.log('Error on playing:', task.text);
+                console.error('Error on playing:', task.text);
                 reject({ status: false });
             }
         });
@@ -78,29 +79,32 @@ const TTS = forwardRef((props: TTSProps, ref) => {
         }
     };
 
-    const fetchAudio = async (text: string): Promise<ReadableStream<Uint8Array> | null> => {
+    const fetchAudio = async (text: string, language: string): Promise<ReadableStream<Uint8Array> | null> => {
         console.log('Fetching audio: %s', text);
         const response = await fetch('/api/tts', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ text: text }),
+            body: JSON.stringify({ text: text, language: language }),
         });
     
         if (response.ok) {
-            return response.body; // Return the streaming body
+            return response.body;
         } else {
             console.error("Failed to generate TTS");
             return null;
         }
     };
-    
+
     const playAudio = async (audioStream: ReadableStream<Uint8Array>): Promise<void> => {
         return new Promise(async (resolve, reject) => {
             try {
-                setIsPlaying(false);
-    
+                if (currentAudioRef.current) {
+                    currentAudioRef.current.pause();
+                    setIsPlaying(false);
+                }
+
                 const mediaSource = new MediaSource();
                 let sourceBuffer: SourceBuffer;
                 let streamEnded = false;  // Flag to check if the stream has ended
@@ -149,7 +153,7 @@ const TTS = forwardRef((props: TTSProps, ref) => {
     
                 const audio = new Audio();
                 audio.src = URL.createObjectURL(mediaSource);
-    
+                currentAudioRef.current = audio; 
                 audio.oncanplay = () => {
                     try {
                         const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -190,12 +194,12 @@ const TTS = forwardRef((props: TTSProps, ref) => {
     };
     
     useImperativeHandle(ref, () => ({
-        generateTTS: async (text: string) => {
+        generateTTS: async (text: string, language: string) => {
             setLoading(true);
             const newTask: TTSQueueItem = {
                 id: ++ttsQueueSequence.current,
                 text: text,
-                audioBuffer: fetchAudio(text), 
+                audioBuffer: fetchAudio(text, language), 
             };
 
             ++ttsQueueSequenceInterim.current;
@@ -219,13 +223,12 @@ const TTS = forwardRef((props: TTSProps, ref) => {
             return ttsQueueSequenceInterim.current;
         },
         clearTTSQueue: () => {
+            if (ttsQueueSequenceInterim.current) ttsQueueSequenceInterim.current = 0;
+            if (currentAudioRef.current) currentAudioRef.current.pause();
             clear();
-            console.log('Clear queue: ', queuedTasks.length);
         },
         startExternalAudioVisualization: (stream: MediaStream) => {
-            if (analyserRef.current) {
-                analyserRef.current.disconnect();
-            }
+            if (analyserRef.current) analyserRef.current.disconnect();
             const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
             const analyserNode = audioContext.createAnalyser();
 

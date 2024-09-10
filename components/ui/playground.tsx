@@ -23,13 +23,13 @@ const Canvas = dynamic(() => import('@/components/ui/canvas'), {
 
 export default function Playground() {
     const { messages, input, handleInputChange, handleSubmit, append } = useChat({
-        onFinish: (message:Message) => {
+        onFinish: (message: Message) => {
             if (!/[.!?:]$/.test(message.content)) {
                 console.log('onFinish special case:', message.content);
                 setMessageBuffer(message.content);
             }
         },
-      });
+    });
     const [messageBuffer, setMessageBuffer] = useState<string>('');
     const [messageBufferRead, setMessageBufferRead] = useState<string>('');
     const [currentlyPlayingTTSText, setCurrentlyPlayingTTSText] = useState<string>('');
@@ -37,7 +37,7 @@ export default function Playground() {
         handleExport: () => string;
     }>(null);
     const ttsRef = useRef<{
-        generateTTS: (text: string) => void;
+        generateTTS: (text: string, language: string) => void;
         getTTSLoadingStatus: () => boolean;
         getTTSPlayingStatus: () => boolean;
         getTTSQueueCount: () => number;
@@ -48,6 +48,7 @@ export default function Playground() {
     const [pauseTimer, setPauseTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
     const [status, setStatus] = useState<'Listening' | 'Speak to interrupt' | 'Processing'>('Listening');
     const [activeStream, setActiveStream] = useState<'user' | 'bot' | null>('user');
+    const [language, setLanguage] = useState<'en-US' | 'id-ID'>('en-US');
     const {
         transcript,
         finalTranscript,
@@ -60,6 +61,7 @@ export default function Playground() {
     const sendTranscript = async () => {
         if (finalTranscript.trim() !== '') {
             setStatus('Processing');
+            if (ttsRef.current) ttsRef.current.clearTTSQueue();
             const canvasDataUrl = canvasRef.current?.handleExport();
             const message: CreateMessage = {
                 role: "user",
@@ -72,7 +74,6 @@ export default function Playground() {
 
             console.log('Sending transcript:', finalTranscript);
             append(message, canvasDataUrl ? options : undefined);
-            if (ttsRef.current) ttsRef.current.clearTTSQueue();
         }
     };
 
@@ -96,7 +97,6 @@ export default function Playground() {
             const latestMessage = messages[messages.length - 1];
             const content = latestMessage.content;
             if (latestMessage?.role === 'assistant') {
-                // console.log('content', content);
                 if (content && /[.!?:]$/.test(content)) {
                     setMessageBuffer(content);
                 }
@@ -114,15 +114,30 @@ export default function Playground() {
                 const trimmedSentence = sentence.trim();
                 if (trimmedSentence && ttsRef.current) {
                     console.log('Sentence:', trimmedSentence);
-                    ttsRef.current.generateTTS(trimmedSentence);
+                    ttsRef.current.generateTTS(trimmedSentence, language);
                 }
             });
         }
     }, [messageBuffer]);
 
     useEffect(() => {
-        SpeechRecognition.startListening({ continuous: true, interimResults: true });
+        SpeechRecognition.startListening({
+            continuous: true,
+            interimResults: true,
+            language: language
+        });
 
+        // if (ttsRef.current) {
+        //     switch(language) {
+        //         case 'id-ID':
+        //             ttsRef.current.generateTTS('Selamat datang di BEExpert!', language);
+        //             break;
+        //         default:
+        //             ttsRef.current.generateTTS('Welcome to BEExpert!', language);
+        //             break;
+        //     }            
+        // }
+        
         return () => {
             SpeechRecognition.stopListening();
             if (pauseTimer) {
@@ -134,9 +149,9 @@ export default function Playground() {
     useEffect(() => {
         if (activeStream === 'user') {
             setStatus('Listening');
+            if (ttsRef.current) ttsRef.current.clearTTSQueue();
             navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
                 if (ttsRef.current) {
-                    ttsRef.current.clearTTSQueue();
                     ttsRef.current.startExternalAudioVisualization(stream);
                 }
             });
@@ -157,7 +172,7 @@ export default function Playground() {
 
     const handleTTSPlayingStatusChange = (status: boolean) => {
         const tts = ttsRef.current;
-        if (tts) console.log('ttsStatus: %s, queue count: %d', status,  tts?.getTTSQueueCount())
+        if (tts) console.log('ttsStatus: %s, queue count: %d', status, tts?.getTTSQueueCount())
         if (status) {
             setActiveStream('bot');
         } else if (tts && tts?.getTTSQueueCount() === 0) {
