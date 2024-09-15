@@ -12,4 +12,5 @@ export type LineData = {
   tool: string;
   points: number[];
   color: string;
+  size: number;
 }

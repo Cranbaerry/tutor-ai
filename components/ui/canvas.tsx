@@ -85,7 +85,7 @@ function Canvas(props: CanvasProps) {
     };
 
     // Store the current color in the line data
-    setLines(prevLines => [...prevLines, { tool, points: [adjustedPos.x, adjustedPos.y], color: colorRef.current }]);
+    setLines(prevLines => [...prevLines, { tool, points: [adjustedPos.x, adjustedPos.y], color: colorRef.current, size: strokeWidth }]);
   };
 
   const handleMouseMove = (e: KonvaEventObject<MouseEvent>) => {
@@ -140,7 +140,7 @@ function Canvas(props: CanvasProps) {
   const getCursorStyle = () => {
     switch (tool) {
       case 'pencil':
-        return 'crosshair';
+        return 'cell';
       case 'eraser':
         return 'not-allowed';
       case 'drag':
@@ -204,11 +204,13 @@ function Canvas(props: CanvasProps) {
             </TooltipWrapper>
             <Separator className="my-2" />
             <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="w-full">
-                  <LineHeightIcon className="h-4 w-4" />
-                </Button>
+              <TooltipWrapper content="Stroke Width">
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="icon" className="w-full">
+                    <LineHeightIcon className="h-4 w-4" />
+                  </Button>
               </PopoverTrigger>
+              </TooltipWrapper>
               <PopoverContent className="w-64">
                 <div className="flex flex-col space-y-2">
                   <label htmlFor="stroke-width" className="text-sm font-medium">
@@ -267,8 +269,8 @@ function Canvas(props: CanvasProps) {
                   <Rect
                     x={0}
                     y={0}
-                    width={dimensions.width}
-                    height={dimensions.height}
+                    width={dimensions.width / scale}
+                    height={dimensions.height / scale}
                     listening={false}
                     fill={"#FAFAFA"}
                   />
@@ -277,7 +279,7 @@ function Canvas(props: CanvasProps) {
                       key={i}
                       points={line.points}
                       stroke={line.color}
-                      strokeWidth={strokeWidth / scale}
+                      strokeWidth={line.size / scale}
                       tension={0.5}
                       lineCap="round"
                       lineJoin="round"
