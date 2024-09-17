@@ -16,13 +16,19 @@ import dynamic from 'next/dynamic';
 import { Badge } from "@/components/ui/badge"
 import { CreateMessage, Message, useChat } from 'ai/react';
 import { ChatRequestOptions, JSONValue } from "ai";
+import { findRelevantContent } from '@/lib/embeddings';
+import { Button } from "@/components/ui/button"
 
 const Canvas = dynamic(() => import('@/components/ui/canvas'), {
     ssr: false,
 });
 
 export default function Playground() {
+    const [toolCall, setToolCall] = useState<string>();
     const { messages, input, handleInputChange, handleSubmit, append } = useChat({
+        onToolCall({ toolCall }) {
+            setToolCall(toolCall.toolName);
+        },
         onFinish: (message: Message) => {
             if (!/[.!?:]$/.test(message.content)) {
                 console.log('onFinish special case:', message.content);
@@ -77,18 +83,15 @@ export default function Playground() {
         }
     };
 
-    const resetPauseTimer = () => {
-        if (pauseTimer) {
-            clearTimeout(pauseTimer);
-        }
-        setPauseTimer(setTimeout(() => {
-            sendTranscript();
-            resetTranscript();
-        }, 2000));
-    };
     useEffect(() => {
         if (finalTranscript) {
-            resetPauseTimer();
+            if (pauseTimer) {
+                clearTimeout(pauseTimer);
+            }
+            setPauseTimer(setTimeout(() => {
+                sendTranscript();
+                resetTranscript();
+            }, 2000));
         }
     }, [finalTranscript]);
 
@@ -137,7 +140,7 @@ export default function Playground() {
         //             break;
         //     }            
         // }
-        
+
         return () => {
             SpeechRecognition.stopListening();
             if (pauseTimer) {
@@ -218,7 +221,7 @@ export default function Playground() {
                 </AlertDialog>
             }
 
-            <Canvas backgroundColor={'#FAFAFA'} canvasRef={canvasRef} />
+            <Canvas backgroundColor={'#FAFAFA)'} canvasRef={canvasRef} />
             <div className="fixed flex bottom-8 left-24 items-center space-x-2">
                 <TTS ref={ttsRef} width={50} height={40} onPlayingStatusChange={handleTTSPlayingStatusChange} onReadingTextChange={handleTTSOnReadingTextChange} />
                 <Badge>{status}</Badge>
