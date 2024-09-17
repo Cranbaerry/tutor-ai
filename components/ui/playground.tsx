@@ -221,7 +221,7 @@ export default function Playground() {
                 </AlertDialog>
             }
 
-            <Canvas backgroundColor={'#FAFAFA)'} canvasRef={canvasRef} />
+            <Canvas backgroundColor={'#FAFAFA'} canvasRef={canvasRef} />
             <div className="fixed flex bottom-8 left-24 items-center space-x-2">
                 <TTS ref={ttsRef} width={50} height={40} onPlayingStatusChange={handleTTSPlayingStatusChange} onReadingTextChange={handleTTSOnReadingTextChange} />
                 <Badge>{status}</Badge>
