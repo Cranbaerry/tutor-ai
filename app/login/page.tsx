@@ -25,6 +25,8 @@ import { Form } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import Swal from 'sweetalert2'
+import { redirect } from 'next/navigation'
 
 const formSchema = z.object({
   email: z.string({
@@ -34,6 +36,41 @@ const formSchema = z.object({
     required_error: "Password harus diisi.",
 }),
 })
+
+async function trylogin(formData: FormData){
+  let loginResult = await Swal.fire({
+    title: "Loading",
+    icon: "info",
+    didOpen: async () => {
+      Swal.showLoading();
+
+      let loginResult = await login(formData)
+
+      console.log(loginResult)
+      if (loginResult){
+        Swal.fire({
+          title: "Login Success!",
+          icon: "success"
+        })
+
+        return true
+
+      } else {
+        Swal.fire({
+          title: "Login Failed!",
+          text: "Email or Password is incorrect!",
+          icon: "error"
+        })
+
+        return false
+      }
+    }
+  });
+
+  if (loginResult) {
+    redirect('/kuisioner')
+  }
+}
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -92,7 +129,7 @@ export default function Login() {
                     )}
                   </Button>
                 </div>
-                <Button className="w-full bg-black text-white hover:bg-zinc-200 hover:text-black" formAction={login}>
+                <Button className="w-full bg-black text-white hover:bg-zinc-200 hover:text-black" formAction={trylogin}>
                   Masuk dengan Email
                 </Button>
               </form> 
