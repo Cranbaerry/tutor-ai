@@ -6,6 +6,45 @@ import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
+import { login, signup } from './login/actions'
+import Swal from 'sweetalert2'
+import { redirect } from 'next/navigation'
+
+async function trylogin(formData: FormData){
+  let loginResult = await Swal.fire({
+    title: "Loading",
+    icon: "info",
+    didOpen: async () => {
+      Swal.showLoading();
+
+      let loginResult = await login(formData)
+
+      console.log(loginResult)
+      if (loginResult){
+        Swal.fire({
+          title: "Login Success!",
+          icon: "success"
+        })
+
+        return true
+
+      } else {
+        Swal.fire({
+          title: "Login Failed!",
+          text: "Email or Password is incorrect!",
+          icon: "error"
+        })
+
+        return false
+      }
+    }
+  });
+
+  if (loginResult) {
+    redirect('/kuisioner')
+  }
+}
+
 
 export default function Home() {
   const [showPassword, setShowPassword] = useState(false);
@@ -47,37 +86,41 @@ export default function Home() {
               Daftar sekarang
             </Link></p>
           </div>
-          <div className="space-y-4">
-            <Input 
-              type="email" 
-              placeholder="name@example.com" 
-              className="bg-[rgb(245,245,245)] border-zinc-700 text-black placeholder-zinc-400"
-            />
-            <div className="relative">
-              <Input 
-                type={showPassword ? "text" : "password"}
-                placeholder="Kata sandi"
-                className="bg-[rgb(245,245,245)] border-zinc-700 text-black placeholder-zinc-400 pr-10"
+          <form action="">
+            <div className="space-y-4">
+              <Input
+                type="email"
+                name="email"
+                placeholder="name@example.com"
+                className="bg-[rgb(245,245,245)] border-zinc-700 text-black placeholder-zinc-400"
               />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                onClick={() => setShowPassword(!showPassword)}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4 text-zinc-500" />
-                ) : (
-                  <Eye className="h-4 w-4 text-zinc-500" />
-                )}
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  placeholder="Kata sandi"
+                  className="bg-[rgb(245,245,245)] border-zinc-700 text-black placeholder-zinc-400 pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4 text-zinc-500" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-zinc-500" />
+                  )}
+                </Button>
+              </div>
+              <Button className="w-full bg-black text-white hover:bg-zinc-200 hover:text-black" formAction={trylogin}>
+                Masuk dengan Email
               </Button>
             </div>
-            <Button className="w-full bg-black text-white hover:bg-zinc-200 hover:text-black">
-              Masuk dengan Email
-            </Button>
-          </div>
+          </form>
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t border-zinc-700"></span>
