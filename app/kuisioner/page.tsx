@@ -18,14 +18,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { agreements, question5, question6, question7, question9 } from "./options"
 import { useRouter } from 'next/navigation'
 import { insert } from './actions'
+import { fetchUserEmail } from './../helper/actions'
+import { useEffect, useState } from 'react';
+import Swal from 'sweetalert2'
 
 const formSchema = z.object({
     fullname: z.string().min(2, {
         message: "Nama lengkap harus setidaknya 2 karakter.",
     }),
-    email: z.string({
-        required_error: "Email harus diisi.",
-    }).email(),
     whatsappNumber: z.string(),
     gender: z.enum(["laki-laki", "perempuan"], {
         required_error: "Pilih salah satu opsi jenis kelamin",
@@ -74,13 +74,33 @@ const formSchema = z.object({
 export default function Kuisioner(){
     const router = useRouter()
 
+    const [email, setEmail] = useState<string | null>("Loading...")
+
+    useEffect(() => {
+      const fetchData = async () => {
+        const result = await fetchUserEmail()
+        setEmail(result!)
+      }
+      fetchData()
+    }, [])
+
+    const onError = (errors) => {
+        // Collect all validation errors and display them in an alert
+        // const errorMessages = Object.values(errors).map(error => error.message).join('<br>');
+        Swal.fire({
+            title: "Validation Failed!",
+            // text: `Validation failed:\n${errorMessages}`,
+            text: `Silahkan mengisi semua kolom yang diberikan.`,
+            icon: "error"
+        })
+    };
+
     // 1. Define your form.
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             agreements: [],
             fullname: "",
-            email: "",
             whatsappNumber: "",
             question5: [],
             question6: [],
@@ -88,13 +108,19 @@ export default function Kuisioner(){
             question9: [],
         },
     })
-    
+
     // 2. Define a submit handler.
     function onSubmit(values: z.infer<typeof formSchema>) {
         // Do something with the form values.
         // ✅ This will be type-safe and validated.
 
         insert(values)
+
+        Swal.fire({
+            title: "Data berhasil disimpan!",
+            icon: "success"
+        })
+
         router.push("/petunjuk-penggunaan")
     }
 
@@ -128,7 +154,7 @@ export default function Kuisioner(){
 
             <div className="h-full w-3/4">
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                    <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-8">
                     <div id="surat-persetujuan" className="rounded-md border-0 p-4 bg-[rgb(255,255,255)]">
                         <h1 className="font-bold text-3xl mb-2">Surat Persetujuan</h1>
                         <FormField
@@ -202,7 +228,7 @@ export default function Kuisioner(){
                                 <FormItem>
                                     <FormLabel>Email</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="johndoe@email.com" {...field} />
+                                        <Input placeholder="johndoe@email.com" {...field} disabled value={email}/>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
