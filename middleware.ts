@@ -7,5 +7,5 @@ export async function middleware(request: NextRequest) {
 
 // Only demo page required to login, can add more later
 export const config = {
-    matcher: ['/demo'],
+    matcher: ['/kuisioner', '/demo', '/evaluasi'],
 }

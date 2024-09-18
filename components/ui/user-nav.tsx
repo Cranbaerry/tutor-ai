@@ -1,3 +1,4 @@
+import { logout } from "@/app/logout/actions"
 import {
   Avatar,
   AvatarFallback,
@@ -53,7 +54,11 @@ export function UserNav() {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem>
-          Log out
+          <form action={logout}>
+            <button type="submit">
+             Log out
+            </button>
+          </form>
           <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
         </DropdownMenuItem>
       </DropdownMenuContent>

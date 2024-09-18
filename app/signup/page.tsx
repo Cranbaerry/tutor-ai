@@ -1,63 +1,44 @@
 'use client'
 
-import Image from "next/image";
 import { Button, buttonVariants } from "@/components/ui/button"
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
+import { SideTemplate } from "@/components/ui/side-template";
+import { signup } from "../login/actions";
 
-export default function Home() {
+export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
     <main className="flex min-h-screen bg-white text-black">
-      <div className="flex-1 flex flex-col justify-between">
-        <div className="p-8">
-          <div className="flex items-center space-x-2">
-            <Image
-              className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert items-center justify-center"
-              src="/beexpert-logo.svg"
-              alt="BEEXPERT Logo"
-              width={120}
-              height={37}
-              priority
-            />
-            <Image
-              className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert items-center justify-center animate-wipe-in-out"
-              src="/beexpert-name.svg"
-              alt="BEEXPERT"
-              width={251}
-              height={37}
-              priority
-            />
-          </div>
-        </div>
-        <div className="p-8">
-          <p className="text-left text-zinc-400">
-            BEEXPERT merupakan platform bimbingan belajar bersama AI. Aplikasi ini ditujukan untuk para siswa SMA yang membutuhkan bantuan dalam mencari solusi suatu permasalahan Matematika, khususnya Trigonometri. Model AI yang diimplementasikan sudah dimodifikasi sedemikian rupa sehingga mampu memberikan respons yang akurat dan berinteraksi secara instan. Dengan mengintegrasikan model GPT-4o, BEEXPERT mampu menerima masukan berupa suara dan gambar secara langsung (live-sketch).
-          </p>
-        </div>
-      </div>
+      <SideTemplate />
       <div className="w-1/2 bg-[rgb(245,245,245)] flex items-center justify-center">
         <div className="w-96 space-y-4">
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold">Masuk</h1>
-            <p className="text-zinc-400">Belum mempunyai akun?{' '}<Link href="/kuisioner" className="underline underline-offset-4 hover:text-black">
-              Daftar sekarang
+            <h1 className="text-3xl font-bold">Daftar</h1>
+            <p className="text-zinc-400">Sudah mempunyai akun?{' '}<Link href="/login" className="underline underline-offset-4 hover:text-black">
+              Masuk sekarang
             </Link></p>
           </div>
           <div className="space-y-4">
-            <Input 
+            <Input
+              id="email"
+              name="email"
               type="email" 
               placeholder="name@example.com" 
               className="bg-[rgb(245,245,245)] border-zinc-700 text-black placeholder-zinc-400"
+              required
             />
             <div className="relative">
-              <Input 
+              <Input
+                id="password"
+                name="password" 
                 type={showPassword ? "text" : "password"}
                 placeholder="Kata sandi"
                 className="bg-[rgb(245,245,245)] border-zinc-700 text-black placeholder-zinc-400 pr-10"
+                required
               />
               <Button
                 type="button"
@@ -74,8 +55,8 @@ export default function Home() {
                 )}
               </Button>
             </div>
-            <Button className="w-full bg-black text-white hover:bg-zinc-200 hover:text-black">
-              Masuk dengan Email
+            <Button className="w-full bg-black text-white hover:bg-zinc-200 hover:text-black" formAction={signup}>
+              Daftar dengan Email
             </Button>
           </div>
           <div className="relative">
@@ -83,7 +64,7 @@ export default function Home() {
               <span className="w-full border-t border-zinc-700"></span>
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-[rgb(245,245,245)] px-2 text-zinc-400">Atau masuk dengan</span>
+              <span className="bg-[rgb(245,245,245)] px-2 text-zinc-400">Atau daftar dengan</span>
             </div>
           </div>
           <Button className="w-full bg-zinc-500 text-white hover:bg-zinc-200 hover:text-black space-x-2">
@@ -111,7 +92,7 @@ export default function Home() {
       </div>
       <div className="absolute top-4 right-4">
         <Button variant="ghost" className="text-black hover:bg-white">
-          Daftar
+          <Link href="/login">Masuk</Link>
         </Button>
       </div>
     </main>
