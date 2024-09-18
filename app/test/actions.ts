@@ -28,6 +28,14 @@ export async function insert(formData: FormData) {
 export async function fetch() {
     const supabase = createClient()
 
+    const { data: { user } } = await supabase.auth.getUser()
+    // const userId = user.id
+    if (user == null) {
+        console.log("User is not logged in")
+    } else {
+        console.log(user.id)
+    }
+
     const data = supabase
         .from('test')
         .select();

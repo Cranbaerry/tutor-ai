@@ -6,7 +6,45 @@ import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { SideTemplate } from "@/components/ui/side-template";
-import { signup } from "../login/actions";
+import { login, signup } from '../login/actions'
+import Swal from 'sweetalert2'
+import { redirect } from 'next/navigation'
+
+async function trylogin(formData: FormData){
+  let loginResult = await Swal.fire({
+    title: "Loading",
+    icon: "info",
+    didOpen: async () => {
+      Swal.showLoading();
+
+      let loginResult = await login(formData)
+
+      console.log(loginResult)
+      if (loginResult){
+        Swal.fire({
+          title: "Login Success!",
+          icon: "success"
+        })
+
+        return true
+
+      } else {
+        Swal.fire({
+          title: "Login Failed!",
+          text: "Email or Password is incorrect!",
+          icon: "error"
+        })
+
+        return false
+      }
+    }
+  });
+
+  if (loginResult) {
+    redirect('/kuisioner')
+  }
+}
+
 
 export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
