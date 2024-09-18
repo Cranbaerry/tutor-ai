@@ -1,9 +1,17 @@
 'use client'
 import { useRef } from "react";
 import { insert } from './actions'
+import Swal from 'sweetalert2'
 
 export default function Form() {
     const ref = useRef<HTMLFormElement>(null);
+
+    Swal.fire({
+        title: 'Error!',
+        text: 'Do you want to continue',
+        icon: 'error',
+        confirmButtonText: 'Cool'
+    })
 
     return (
         <form ref={ref} action={async (formData) => {

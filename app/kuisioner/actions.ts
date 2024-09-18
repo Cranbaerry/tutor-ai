@@ -5,20 +5,27 @@ import { redirect } from 'next/navigation'
 
 import { createClient } from '@/utils/supabase/server'
 import formSchema from './page'
-import { z } from "zod"
-
 
 export async function insert(values: any) {
     const supabase = createClient()
 
     console.log('insert')
-    console.log(values)
 
     // type-casting here for convenience
     // in practice, you should validate your inputs
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (user == null) {
+        console.log("User is not logged in")
+        redirect('/error')
+        return false;
+    } else {
+        console.log(user.id)
+    }
+
     const formData = {
         fullname: values.fullname as string,
-        email: values.email as string,
+        user_id: user.id,
         whatsapp_number: values.whatsappNumber as string,
         gender : values.gender as string,
         profession : values.profession as string,
@@ -28,7 +35,9 @@ export async function insert(values: any) {
         updated_at: new Date().toISOString()
     }
 
-    const { data, error } = await supabase.from('users').insert(formData).select()
+    console.log(formData)
+
+    const { data, error } = await supabase.from('profiles').insert(formData).select()
     if (error) {
         console.log(error.message);
         return false;
@@ -36,10 +45,10 @@ export async function insert(values: any) {
     }
 
     // Could be used later
-    let userId = data[0].id
+    let profileId = data[0].id
 
     const questionFormData = {
-        user_id: userId as number,
+        profile_id: profileId as number,
         question1: values.question1 as string,
         question2: values.question2 as string,
         question3: values.question3 as string,
