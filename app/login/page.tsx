@@ -1,17 +1,3 @@
-// import { login, signup } from './actions'
-
-// export default function LoginPage() {
-//   return (
-//     <form>
-//       <label htmlFor="email">Email:</label>
-//       <input id="email" name="email" type="email" required />
-//       <label htmlFor="password">Password:</label>
-//       <input id="password" name="password" type="password" required />
-//       <button formAction={login}>Log in</button>
-//       <button formAction={signup}>Sign up</button>
-//     </form>
-//   )
-// }
 'use client'
 
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -20,13 +6,19 @@ import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { SideTemplate } from "@/components/ui/side-template";
-import { login } from "./actions";
+import { login, OAuthLogin } from "./actions";
 import { Form } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Swal from 'sweetalert2'
 import { redirect } from 'next/navigation'
+import { NextRequest } from "next/server";
+
+// export async function GET(request: NextRequest) {
+//   console.log(request.nextUrl.searchParams.get("code"));
+//   return new Response("Hello, Next.js!");
+// }
 
 const formSchema = z.object({
   email: z.string({
@@ -70,6 +62,33 @@ async function trylogin(formData: FormData){
   if (loginResult) {
     redirect('/kuisioner')
   }
+}
+
+async function tryOAUTHLogin(){
+  let loginResult = await Swal.fire({
+    title: "Loading",
+    icon: "info",
+    didOpen: async () => {
+      Swal.showLoading();
+
+      let isLoginFailed = await OAuthLogin()
+
+      console.log(isLoginFailed)
+      if (isLoginFailed){
+        Swal.fire({
+          title: "Login Failed!",
+          text: "Error when processing OAUTH!",
+          icon: "error"
+        })
+        return true
+
+      } else {
+        return false
+      }
+    }
+  });
+
+
 }
 
 export default function Login() {
@@ -143,7 +162,7 @@ export default function Login() {
               <span className="bg-[rgb(245,245,245)] px-2 text-zinc-400">Atau masuk dengan</span>
             </div>
           </div>
-          <Button className="w-full bg-zinc-500 text-white hover:bg-zinc-200 hover:text-black space-x-2">
+          <Button className="w-full bg-zinc-500 text-white hover:bg-zinc-200 hover:text-black space-x-2" onClick={tryOAUTHLogin}>
             <svg viewBox="0 0 24 24" className="w-5 h-5" aria-hidden="true">
               <path
                 fill="currentColor"

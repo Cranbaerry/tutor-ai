@@ -18,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { agreements, question5, question6, question7, question9 } from "./options"
 import { useRouter } from 'next/navigation'
 import { insert } from './actions'
-import { fetchUserEmail } from './../helper/actions'
+import { fetchUserEmail, fetchUserFullname } from './../helper/actions'
 import { useEffect, useState } from 'react';
 import Swal from 'sweetalert2'
 
@@ -27,6 +27,7 @@ const formSchema = z.object({
         message: "Nama lengkap harus setidaknya 2 karakter.",
     }),
     whatsappNumber: z.string(),
+    email: z.string(),
     gender: z.enum(["laki-laki", "perempuan"], {
         required_error: "Pilih salah satu opsi jenis kelamin",
     }),
@@ -75,16 +76,21 @@ export default function Kuisioner(){
     const router = useRouter()
 
     const [email, setEmail] = useState<string | null>("Loading...")
+    const [fullname, setFullname] = useState<string | null>("")
 
     useEffect(() => {
       const fetchData = async () => {
-        const result = await fetchUserEmail()
-        setEmail(result!)
+        const fullnameRes = await fetchUserFullname()
+        if (fullnameRes != null){
+            setFullname(fullnameRes!)
+        }
+        const emailRes = await fetchUserEmail()
+        setEmail(emailRes!)
       }
       fetchData()
     }, [])
 
-    const onError = (errors) => {
+    const onError = (errors: any) => {
         // Collect all validation errors and display them in an alert
         // const errorMessages = Object.values(errors).map(error => error.message).join('<br>');
         Swal.fire({
@@ -101,6 +107,7 @@ export default function Kuisioner(){
         defaultValues: {
             agreements: [],
             fullname: "",
+            email: "",
             whatsappNumber: "",
             question5: [],
             question6: [],
@@ -214,7 +221,7 @@ export default function Kuisioner(){
                                 <FormItem>
                                     <FormLabel>Nama Lengkap</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="John Doe" {...field} />
+                                        <Input placeholder="John Doe" {...field} value={fullname!} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -228,7 +235,7 @@ export default function Kuisioner(){
                                 <FormItem>
                                     <FormLabel>Email</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="johndoe@email.com" {...field} disabled value={email}/>
+                                        <Input placeholder="johndoe@email.com" {...field} disabled value={email!}/>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

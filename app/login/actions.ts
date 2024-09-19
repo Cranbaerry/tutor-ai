@@ -46,3 +46,39 @@ export async function signup(formData: FormData) {
     revalidatePath('/kuisioner', 'layout')
     redirect('/kuisioner')
 }
+
+export async function OAuthLogin(){
+    const supabase = createClient()
+
+    const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+            redirectTo: `${process.env.BASE_URL}/auth/callback`,
+        },
+    })
+
+    if (data == null) {
+        return true
+    } else {
+        // console.log(data)
+        redirect(data.url!)
+    }
+}
+
+export async function handleSignInWithGoogle(code: string) {
+    const supabase = createClient()
+
+    const { data, error } = await supabase.auth.signInWithIdToken({
+        provider: 'google',
+        token: code,
+    })
+
+    if (error) {
+        console.log(error.message);
+        return false;
+    }
+
+    revalidatePath('/', 'layout')
+
+    return true;
+}

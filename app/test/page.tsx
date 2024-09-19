@@ -11,6 +11,7 @@ export default function TestPage() {
             <p>Record:</p>
 
             <Data />
+
         </div>
     )
 }
