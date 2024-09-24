@@ -12,7 +12,7 @@ export default function Main() {
             <div className="hidden h-full flex-col md:flex">
                 <div className="flex flex-col items-start justify-between space-y-2 p-4 sm:flex-row sm:items-center sm:space-y-0 md:h-16">
                     <Image
-                        className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert items-center justify-center mr-1"
+                        className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] items-center justify-center mr-2"
                         src="/beexpert-logo.svg"
                         alt="BEEXPERT Logo"
                         width={40}
