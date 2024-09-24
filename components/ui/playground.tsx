@@ -51,7 +51,6 @@ export default function Playground() {
         clearTTSQueue: () => void;
         startExternalAudioVisualization: (stream: MediaStream) => void;
     }>();
-
     
     const [questionSheetImageSource, setQuestionSheetImageSource] = useState<HTMLImageElement | null>(null);
     const [pauseTimer, setPauseTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
