@@ -10,8 +10,7 @@ import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase"
 import { HuggingFaceInferenceEmbeddings } from "@langchain/community/embeddings/hf";
 const embeddings = new HuggingFaceInferenceEmbeddings({
   model: "BAAI/bge-m3",
-  apiKey: "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"
-  // apiKey: process.env.HUGGINGFACEHUB_API_KEY ?? ''
+  apiKey: process.env.HUGGINGFACEHUB_API_KEY ?? ''
 });
 
 const supabaseClient = createClient(
@@ -28,6 +27,5 @@ export const vectorStore = new SupabaseVectorStore(embeddings, {
 export const findRelevantContent = async (userQuery: string) => {
   console.log('Querying:', userQuery);
   const similarGuides = await vectorStore.similaritySearch(userQuery, 5);
-  console.log('Data:', similarGuides);
   return similarGuides;
 }

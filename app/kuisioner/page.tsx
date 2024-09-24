@@ -8,7 +8,7 @@ import {
     NavigationMenuItem,
     NavigationMenuLink,
     NavigationMenuList,
-  } from "@/components/ui/navigation-menu"
+} from "@/components/ui/navigation-menu"
 import Link from "next/link"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -18,9 +18,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { agreements, question5, question6, question7, question9 } from "./options"
 import { useRouter } from 'next/navigation'
 import { insert } from './actions'
-import { fetchUserEmail, fetchUserFullname } from './../helper/actions'
 import { useEffect, useState } from 'react';
-import Swal from 'sweetalert2'
+import { toast } from "sonner"
+import type { InferGetServerSidePropsType, GetServerSideProps } from 'next'
+import { getUserData } from "@/lib/utils.server"
 
 const formSchema = z.object({
     fullname: z.string().min(2, {
@@ -72,36 +73,26 @@ const formSchema = z.object({
     }),
 })
 
-export default function Kuisioner(){
-    const router = useRouter()
-
-    const [email, setEmail] = useState<string | null>("Loading...")
-    const [fullname, setFullname] = useState<string | null>("")
+export default function Kuisioner() {
+    const router = useRouter();
+    const [email, setEmail] = useState<string | null>(null);
+    const [fullname, setFullname] = useState<string | null>("");
 
     useEffect(() => {
-      const fetchData = async () => {
-        const fullnameRes = await fetchUserFullname()
-        if (fullnameRes != null){
-            setFullname(fullnameRes!)
+        const fetchData = async () => {
+            const user = await getUserData();
+            if (user != null) {
+                setFullname(user.user_metadata.full_name)
+                setEmail(user.email ?? null)
+            } 
         }
-        const emailRes = await fetchUserEmail()
-        setEmail(emailRes!)
-      }
-      fetchData()
+        fetchData()
     }, [])
 
     const onError = (errors: any) => {
-        // Collect all validation errors and display them in an alert
-        // const errorMessages = Object.values(errors).map(error => error.message).join('<br>');
-        Swal.fire({
-            title: "Validation Failed!",
-            // text: `Validation failed:\n${errorMessages}`,
-            text: `Silahkan mengisi semua kolom yang diberikan.`,
-            icon: "error"
-        })
+        toast.error('Error', { description: 'Silahkan mengisi semua kolom yang diberikan.' })
     };
 
-    // 1. Define your form.
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -116,18 +107,9 @@ export default function Kuisioner(){
         },
     })
 
-    // 2. Define a submit handler.
     function onSubmit(values: z.infer<typeof formSchema>) {
-        // Do something with the form values.
-        // ✅ This will be type-safe and validated.
-
         insert(values)
-
-        Swal.fire({
-            title: "Data berhasil disimpan!",
-            icon: "success"
-        })
-
+        toast.success('Success', { description: 'Data berhasil disimpan!' })
         router.push("/petunjuk-penggunaan")
     }
 
@@ -162,198 +144,198 @@ export default function Kuisioner(){
             <div className="h-full w-3/4">
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-8">
-                    <div id="surat-persetujuan" className="rounded-md border-0 p-4 bg-[rgb(255,255,255)]">
-                        <h1 className="font-bold text-3xl mb-2">Surat Persetujuan</h1>
-                        <FormField
-                            control={form.control}
-                            name="agreements"
-                            render={() => (
-                                <FormItem>
-                                <div className="mb-4">
-                                    <FormLabel>Dengan mengikuti kegiatan uji coba pengembangan aplikasi BEEXPERT, saya setuju untuk:</FormLabel>
-                                </div>
-                                {agreements.map((item) => (
-                                    <FormField
-                                    key={item.id}
-                                    control={form.control}
-                                    name="agreements"
-                                    render={({ field }) => {
-                                        const value = field.value ?? []; // Ensure field.value is an array
-                                        return (
-                                        <FormItem
-                                            key={item.id}
-                                            className="flex flex-row items-center space-x-3 space-y-0"
-                                        >
-                                            <FormControl>
-                                            <Checkbox
-                                                checked={field.value?.includes(item.id)}
-                                                onCheckedChange={(checked) => {
-                                                return checked
-                                                    ? field.onChange([...field.value, item.id])
-                                                    : field.onChange(
-                                                        field.value?.filter(
-                                                        (value) => value !== item.id
-                                                        )
+                        <div id="surat-persetujuan" className="rounded-md border-0 p-4 bg-[rgb(255,255,255)]">
+                            <h1 className="font-bold text-3xl mb-2">Surat Persetujuan</h1>
+                            <FormField
+                                control={form.control}
+                                name="agreements"
+                                render={() => (
+                                    <FormItem>
+                                        <div className="mb-4">
+                                            <FormLabel>Dengan mengikuti kegiatan uji coba pengembangan aplikasi BEEXPERT, saya setuju untuk:</FormLabel>
+                                        </div>
+                                        {agreements.map((item) => (
+                                            <FormField
+                                                key={item.id}
+                                                control={form.control}
+                                                name="agreements"
+                                                render={({ field }) => {
+                                                    const value = field.value ?? []; // Ensure field.value is an array
+                                                    return (
+                                                        <FormItem
+                                                            key={item.id}
+                                                            className="flex flex-row items-center space-x-3 space-y-0"
+                                                        >
+                                                            <FormControl>
+                                                                <Checkbox
+                                                                    checked={field.value?.includes(item.id)}
+                                                                    onCheckedChange={(checked) => {
+                                                                        return checked
+                                                                            ? field.onChange([...field.value, item.id])
+                                                                            : field.onChange(
+                                                                                field.value?.filter(
+                                                                                    (value) => value !== item.id
+                                                                                )
+                                                                            )
+                                                                    }}
+                                                                />
+                                                            </FormControl>
+                                                            <FormLabel className="font-normal leading-normal">
+                                                                {item.label}
+                                                            </FormLabel>
+                                                        </FormItem>
                                                     )
                                                 }}
                                             />
-                                            </FormControl>
-                                            <FormLabel className="font-normal leading-normal">
-                                            {item.label}
-                                            </FormLabel>
-                                        </FormItem>
-                                        )
-                                    }}
-                                    />
-                                ))}
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>
-
-                    <div id="data-diri" className="rounded-md border-0 p-4 bg-[rgb(255,255,255)] mt-10">
-                        <h1 className="font-bold text-3xl mb-2">Data Diri</h1>
-                        <FormField
-                            control={form.control}
-                            name="fullname"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Nama Lengkap</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="John Doe" {...field} value={fullname!} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <br />
-                        <FormField
-                            control={form.control}
-                            name="email"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Email</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="johndoe@email.com" {...field} disabled value={email!}/>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <br />
-                        <FormField
-                            control={form.control}
-                            name="whatsappNumber"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Nomor Whatsapp (opsional)</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="081234567890" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <br />
-                        <FormField
-                            control={form.control}
-                            name="gender"
-                            render={({ field }) => (
-                                <FormItem className="space-y-3">
-                                    <FormLabel>Jenis Kelamin</FormLabel>
-                                    <FormControl>
-                                        <RadioGroup
-                                            onValueChange={field.onChange}
-                                            defaultValue={field.value}
-                                            className="flex flex-row space-y-1"
-                                        >
-                                            <FormItem className="flex items-center space-x-3 space-y-0">
-                                                <FormControl>
-                                                <RadioGroupItem value="laki-laki" />
-                                                </FormControl>
-                                                <FormLabel className="font-normal">
-                                                    Laki-laki
-                                                </FormLabel>
-                                            </FormItem>
-                                            <FormItem className="flex items-center space-x-3 space-y-0 ml-10">
-                                                <FormControl>
-                                                <RadioGroupItem value="perempuan" />
-                                                </FormControl>
-                                                <FormLabel className="font-normal">
-                                                    Perempuan
-                                                </FormLabel>
-                                            </FormItem>
-                                        </RadioGroup>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <br />
-                        <FormField
-                            control={form.control}
-                            name="profession"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Profesi</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                        <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Pilih salah satu profesi" />
-                                        </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            <SelectItem value="student">Pelajar</SelectItem>
-                                            <SelectItem value="teacher">Pendidik (Guru, Dosen, dll)</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <br />
-                        <FormField
-                            control={form.control}
-                            name="educationLevel"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Jenjang Pendidikan</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                        <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Pilih salah satu profesi" />
-                                        </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            <SelectItem value="elementary_school">Sekolah Dasar (SD)</SelectItem>
-                                            <SelectItem value="junior_high_school">Sekolah Menengah Pertama (SMP)</SelectItem>
-                                            <SelectItem value="high_school">Sekolah Menengah Atas (SMA)</SelectItem>
-                                            <SelectItem value="bachelor">Strata 1 (S1) - Sarjana</SelectItem>
-                                            <SelectItem value="master">Strata 2 (S2) - Magister</SelectItem>
-                                            <SelectItem value="doctoral">Strata 3 (S3) - Doktoral</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <br />
-                        <FormField
-                            control={form.control}
-                            name="school"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Asal Sekolah/Institusi</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="SMA xxx" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                                        ))}
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
                         </div>
-                        
+
+                        <div id="data-diri" className="rounded-md border-0 p-4 bg-[rgb(255,255,255)] mt-10">
+                            <h1 className="font-bold text-3xl mb-2">Data Diri</h1>
+                            <FormField
+                                control={form.control}
+                                name="fullname"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Nama Lengkap</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="John Doe" {...field} value={fullname!} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <br />
+                            <FormField
+                                control={form.control}
+                                name="email"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Email</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="johndoe@email.com" {...field} disabled value={email!} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <br />
+                            <FormField
+                                control={form.control}
+                                name="whatsappNumber"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Nomor Whatsapp (opsional)</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="081234567890" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <br />
+                            <FormField
+                                control={form.control}
+                                name="gender"
+                                render={({ field }) => (
+                                    <FormItem className="space-y-3">
+                                        <FormLabel>Jenis Kelamin</FormLabel>
+                                        <FormControl>
+                                            <RadioGroup
+                                                onValueChange={field.onChange}
+                                                defaultValue={field.value}
+                                                className="flex flex-row space-y-1"
+                                            >
+                                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                                    <FormControl>
+                                                        <RadioGroupItem value="laki-laki" />
+                                                    </FormControl>
+                                                    <FormLabel className="font-normal">
+                                                        Laki-laki
+                                                    </FormLabel>
+                                                </FormItem>
+                                                <FormItem className="flex items-center space-x-3 space-y-0 ml-10">
+                                                    <FormControl>
+                                                        <RadioGroupItem value="perempuan" />
+                                                    </FormControl>
+                                                    <FormLabel className="font-normal">
+                                                        Perempuan
+                                                    </FormLabel>
+                                                </FormItem>
+                                            </RadioGroup>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <br />
+                            <FormField
+                                control={form.control}
+                                name="profession"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Profesi</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Pilih salah satu profesi" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                <SelectItem value="student">Pelajar</SelectItem>
+                                                <SelectItem value="teacher">Pendidik (Guru, Dosen, dll)</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <br />
+                            <FormField
+                                control={form.control}
+                                name="educationLevel"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Jenjang Pendidikan</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Pilih salah satu profesi" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                <SelectItem value="elementary_school">Sekolah Dasar (SD)</SelectItem>
+                                                <SelectItem value="junior_high_school">Sekolah Menengah Pertama (SMP)</SelectItem>
+                                                <SelectItem value="high_school">Sekolah Menengah Atas (SMA)</SelectItem>
+                                                <SelectItem value="bachelor">Strata 1 (S1) - Sarjana</SelectItem>
+                                                <SelectItem value="master">Strata 2 (S2) - Magister</SelectItem>
+                                                <SelectItem value="doctoral">Strata 3 (S3) - Doktoral</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <br />
+                            <FormField
+                                control={form.control}
+                                name="school"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Asal Sekolah/Institusi</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="SMA xxx" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+
                         <div id="pertanyaan-umum" className="rounded-md border-0 p-4 bg-[rgb(255,255,255)] mt-10">
                             <h1 className="font-bold text-3xl mb-2">Pertanyaan Umum</h1>
                             <FormField
@@ -370,7 +352,7 @@ export default function Kuisioner(){
                                             >
                                                 <FormItem className="flex items-center space-x-3 space-y-0">
                                                     <FormControl>
-                                                    <RadioGroupItem value="pernah" />
+                                                        <RadioGroupItem value="pernah" />
                                                     </FormControl>
                                                     <FormLabel className="font-normal">
                                                         Pernah
@@ -378,7 +360,7 @@ export default function Kuisioner(){
                                                 </FormItem>
                                                 <FormItem className="flex items-center space-x-3 space-y-0 ml-10">
                                                     <FormControl>
-                                                    <RadioGroupItem value="tidak_pernah" />
+                                                        <RadioGroupItem value="tidak_pernah" />
                                                     </FormControl>
                                                     <FormLabel className="font-normal">
                                                         Tidak pernah
@@ -405,7 +387,7 @@ export default function Kuisioner(){
                                             >
                                                 <FormItem className="flex items-center space-x-3 space-y-0">
                                                     <FormControl>
-                                                    <RadioGroupItem value="tidak_paham" />
+                                                        <RadioGroupItem value="tidak_paham" />
                                                     </FormControl>
                                                     <FormLabel className="font-normal">
                                                         Tidak paham
@@ -413,7 +395,7 @@ export default function Kuisioner(){
                                                 </FormItem>
                                                 <FormItem className="flex items-center space-x-3 space-y-0 ml-10">
                                                     <FormControl>
-                                                    <RadioGroupItem value="sedikit_paham" />
+                                                        <RadioGroupItem value="sedikit_paham" />
                                                     </FormControl>
                                                     <FormLabel className="font-normal">
                                                         Sedikit paham
@@ -421,7 +403,7 @@ export default function Kuisioner(){
                                                 </FormItem>
                                                 <FormItem className="flex items-center space-x-3 space-y-0 ml-10">
                                                     <FormControl>
-                                                    <RadioGroupItem value="cukup_paham" />
+                                                        <RadioGroupItem value="cukup_paham" />
                                                     </FormControl>
                                                     <FormLabel className="font-normal">
                                                         Cukup paham
@@ -429,7 +411,7 @@ export default function Kuisioner(){
                                                 </FormItem>
                                                 <FormItem className="flex items-center space-x-3 space-y-0 ml-10">
                                                     <FormControl>
-                                                    <RadioGroupItem value="sangat_paham" />
+                                                        <RadioGroupItem value="sangat_paham" />
                                                     </FormControl>
                                                     <FormLabel className="font-normal">
                                                         Sangat paham
@@ -456,7 +438,7 @@ export default function Kuisioner(){
                                             >
                                                 <FormItem className="flex items-center space-x-3 space-y-0">
                                                     <FormControl>
-                                                    <RadioGroupItem value="pernah" />
+                                                        <RadioGroupItem value="pernah" />
                                                     </FormControl>
                                                     <FormLabel className="font-normal">
                                                         Pernah
@@ -464,7 +446,7 @@ export default function Kuisioner(){
                                                 </FormItem>
                                                 <FormItem className="flex items-center space-x-3 space-y-0 ml-10">
                                                     <FormControl>
-                                                    <RadioGroupItem value="tidak_pernah" />
+                                                        <RadioGroupItem value="tidak_pernah" />
                                                     </FormControl>
                                                     <FormLabel className="font-normal">
                                                         Tidak pernah
@@ -491,7 +473,7 @@ export default function Kuisioner(){
                                             >
                                                 <FormItem className="flex items-center space-x-3 space-y-0">
                                                     <FormControl>
-                                                    <RadioGroupItem value="ya" />
+                                                        <RadioGroupItem value="ya" />
                                                     </FormControl>
                                                     <FormLabel className="font-normal">
                                                         Ya
@@ -499,7 +481,7 @@ export default function Kuisioner(){
                                                 </FormItem>
                                                 <FormItem className="flex items-center space-x-3 space-y-0 ml-10">
                                                     <FormControl>
-                                                    <RadioGroupItem value="tidak" />
+                                                        <RadioGroupItem value="tidak" />
                                                     </FormControl>
                                                     <FormLabel className="font-normal">
                                                         Tidak
@@ -517,44 +499,44 @@ export default function Kuisioner(){
                                 name="question5"
                                 render={() => (
                                     <FormItem>
-                                    <div className="mb-4">
-                                        <FormLabel>Apa tujuan Anda menggunakan chatbot?</FormLabel>
-                                    </div>
-                                    {question5.map((item) => (
-                                        <FormField
-                                        key={item.id}
-                                        control={form.control}
-                                        name="question5"
-                                        render={({ field }) => {
-                                            const value = field.value ?? []; // Ensure field.value is an array
-                                            return (
-                                            <FormItem
+                                        <div className="mb-4">
+                                            <FormLabel>Apa tujuan Anda menggunakan chatbot?</FormLabel>
+                                        </div>
+                                        {question5.map((item) => (
+                                            <FormField
                                                 key={item.id}
-                                                className="flex flex-row items-center space-x-3 space-y-0"
-                                            >
-                                                <FormControl>
-                                                <Checkbox
-                                                    checked={field.value?.includes(item.id)}
-                                                    onCheckedChange={(checked) => {
-                                                    return checked
-                                                        ? field.onChange([...field.value, item.id])
-                                                        : field.onChange(
-                                                            field.value?.filter(
-                                                            (value) => value !== item.id
-                                                            )
-                                                        )
-                                                    }}
-                                                />
-                                                </FormControl>
-                                                <FormLabel className="font-normal leading-normal">
-                                                {item.label}
-                                                </FormLabel>
-                                            </FormItem>
-                                            )
-                                        }}
-                                        />
-                                    ))}
-                                    <FormMessage />
+                                                control={form.control}
+                                                name="question5"
+                                                render={({ field }) => {
+                                                    const value = field.value ?? []; // Ensure field.value is an array
+                                                    return (
+                                                        <FormItem
+                                                            key={item.id}
+                                                            className="flex flex-row items-center space-x-3 space-y-0"
+                                                        >
+                                                            <FormControl>
+                                                                <Checkbox
+                                                                    checked={field.value?.includes(item.id)}
+                                                                    onCheckedChange={(checked) => {
+                                                                        return checked
+                                                                            ? field.onChange([...field.value, item.id])
+                                                                            : field.onChange(
+                                                                                field.value?.filter(
+                                                                                    (value) => value !== item.id
+                                                                                )
+                                                                            )
+                                                                    }}
+                                                                />
+                                                            </FormControl>
+                                                            <FormLabel className="font-normal leading-normal">
+                                                                {item.label}
+                                                            </FormLabel>
+                                                        </FormItem>
+                                                    )
+                                                }}
+                                            />
+                                        ))}
+                                        <FormMessage />
                                     </FormItem>
                                 )}
                             />
@@ -564,44 +546,44 @@ export default function Kuisioner(){
                                 name="question6"
                                 render={() => (
                                     <FormItem>
-                                    <div className="mb-4">
-                                        <FormLabel>Apa fitur AI chatbot yang paling Anda sukai?</FormLabel>
-                                    </div>
-                                    {question6.map((item) => (
-                                        <FormField
-                                        key={item.id}
-                                        control={form.control}
-                                        name="question6"
-                                        render={({ field }) => {
-                                            const value = field.value ?? []; // Ensure field.value is an array
-                                            return (
-                                            <FormItem
+                                        <div className="mb-4">
+                                            <FormLabel>Apa fitur AI chatbot yang paling Anda sukai?</FormLabel>
+                                        </div>
+                                        {question6.map((item) => (
+                                            <FormField
                                                 key={item.id}
-                                                className="flex flex-row items-center space-x-3 space-y-0"
-                                            >
-                                                <FormControl>
-                                                <Checkbox
-                                                    checked={field.value?.includes(item.id)}
-                                                    onCheckedChange={(checked) => {
-                                                    return checked
-                                                        ? field.onChange([...field.value, item.id])
-                                                        : field.onChange(
-                                                            field.value?.filter(
-                                                            (value) => value !== item.id
-                                                            )
-                                                        )
-                                                    }}
-                                                />
-                                                </FormControl>
-                                                <FormLabel className="font-normal leading-normal">
-                                                {item.label}
-                                                </FormLabel>
-                                            </FormItem>
-                                            )
-                                        }}
-                                        />
-                                    ))}
-                                    <FormMessage />
+                                                control={form.control}
+                                                name="question6"
+                                                render={({ field }) => {
+                                                    const value = field.value ?? []; // Ensure field.value is an array
+                                                    return (
+                                                        <FormItem
+                                                            key={item.id}
+                                                            className="flex flex-row items-center space-x-3 space-y-0"
+                                                        >
+                                                            <FormControl>
+                                                                <Checkbox
+                                                                    checked={field.value?.includes(item.id)}
+                                                                    onCheckedChange={(checked) => {
+                                                                        return checked
+                                                                            ? field.onChange([...field.value, item.id])
+                                                                            : field.onChange(
+                                                                                field.value?.filter(
+                                                                                    (value) => value !== item.id
+                                                                                )
+                                                                            )
+                                                                    }}
+                                                                />
+                                                            </FormControl>
+                                                            <FormLabel className="font-normal leading-normal">
+                                                                {item.label}
+                                                            </FormLabel>
+                                                        </FormItem>
+                                                    )
+                                                }}
+                                            />
+                                        ))}
+                                        <FormMessage />
                                     </FormItem>
                                 )}
                             />
@@ -611,44 +593,44 @@ export default function Kuisioner(){
                                 name="question7"
                                 render={() => (
                                     <FormItem>
-                                    <div className="mb-4">
-                                        <FormLabel>Hal apa yang Anda kurang sukai dari AI chatbot?</FormLabel>
-                                    </div>
-                                    {question7.map((item) => (
-                                        <FormField
-                                        key={item.id}
-                                        control={form.control}
-                                        name="question7"
-                                        render={({ field }) => {
-                                            const value = field.value ?? []; // Ensure field.value is an array
-                                            return (
-                                            <FormItem
+                                        <div className="mb-4">
+                                            <FormLabel>Hal apa yang Anda kurang sukai dari AI chatbot?</FormLabel>
+                                        </div>
+                                        {question7.map((item) => (
+                                            <FormField
                                                 key={item.id}
-                                                className="flex flex-row items-center space-x-3 space-y-0"
-                                            >
-                                                <FormControl>
-                                                <Checkbox
-                                                    checked={field.value?.includes(item.id)}
-                                                    onCheckedChange={(checked) => {
-                                                    return checked
-                                                        ? field.onChange([...field.value, item.id])
-                                                        : field.onChange(
-                                                            field.value?.filter(
-                                                            (value) => value !== item.id
-                                                            )
-                                                        )
-                                                    }}
-                                                />
-                                                </FormControl>
-                                                <FormLabel className="font-normal leading-normal">
-                                                {item.label}
-                                                </FormLabel>
-                                            </FormItem>
-                                            )
-                                        }}
-                                        />
-                                    ))}
-                                    <FormMessage />
+                                                control={form.control}
+                                                name="question7"
+                                                render={({ field }) => {
+                                                    const value = field.value ?? []; // Ensure field.value is an array
+                                                    return (
+                                                        <FormItem
+                                                            key={item.id}
+                                                            className="flex flex-row items-center space-x-3 space-y-0"
+                                                        >
+                                                            <FormControl>
+                                                                <Checkbox
+                                                                    checked={field.value?.includes(item.id)}
+                                                                    onCheckedChange={(checked) => {
+                                                                        return checked
+                                                                            ? field.onChange([...field.value, item.id])
+                                                                            : field.onChange(
+                                                                                field.value?.filter(
+                                                                                    (value) => value !== item.id
+                                                                                )
+                                                                            )
+                                                                    }}
+                                                                />
+                                                            </FormControl>
+                                                            <FormLabel className="font-normal leading-normal">
+                                                                {item.label}
+                                                            </FormLabel>
+                                                        </FormItem>
+                                                    )
+                                                }}
+                                            />
+                                        ))}
+                                        <FormMessage />
                                     </FormItem>
                                 )}
                             />
@@ -667,7 +649,7 @@ export default function Kuisioner(){
                                             >
                                                 <FormItem className="flex items-center space-x-3 space-y-0">
                                                     <FormControl>
-                                                    <RadioGroupItem value="setuju" />
+                                                        <RadioGroupItem value="setuju" />
                                                     </FormControl>
                                                     <FormLabel className="font-normal">
                                                         Setuju
@@ -675,7 +657,7 @@ export default function Kuisioner(){
                                                 </FormItem>
                                                 <FormItem className="flex items-center space-x-3 space-y-0 ml-10">
                                                     <FormControl>
-                                                    <RadioGroupItem value="mungkin" />
+                                                        <RadioGroupItem value="mungkin" />
                                                     </FormControl>
                                                     <FormLabel className="font-normal">
                                                         Mungkin
@@ -683,7 +665,7 @@ export default function Kuisioner(){
                                                 </FormItem>
                                                 <FormItem className="flex items-center space-x-3 space-y-0 ml-10">
                                                     <FormControl>
-                                                    <RadioGroupItem value="tidak_setuju" />
+                                                        <RadioGroupItem value="tidak_setuju" />
                                                     </FormControl>
                                                     <FormLabel className="font-normal">
                                                         Tidak setuju
@@ -701,49 +683,49 @@ export default function Kuisioner(){
                                 name="question9"
                                 render={() => (
                                     <FormItem>
-                                    <div className="mb-4">
-                                        <FormLabel>Hal apa yang Anda kurang sukai dari AI chatbot?</FormLabel>
-                                    </div>
-                                    {question9.map((item) => (
-                                        <FormField
-                                        key={item.id}
-                                        control={form.control}
-                                        name="question9"
-                                        render={({ field }) => {
-                                            const value = field.value ?? []; // Ensure field.value is an array
-                                            return (
-                                            <FormItem
+                                        <div className="mb-4">
+                                            <FormLabel>Hal apa yang Anda kurang sukai dari AI chatbot?</FormLabel>
+                                        </div>
+                                        {question9.map((item) => (
+                                            <FormField
                                                 key={item.id}
-                                                className="flex flex-row items-center space-x-3 space-y-0"
-                                            >
-                                                <FormControl>
-                                                <Checkbox
-                                                    checked={field.value?.includes(item.id)}
-                                                    onCheckedChange={(checked) => {
-                                                    return checked
-                                                        ? field.onChange([...field.value, item.id])
-                                                        : field.onChange(
-                                                            field.value?.filter(
-                                                            (value) => value !== item.id
-                                                            )
-                                                        )
-                                                    }}
-                                                />
-                                                </FormControl>
-                                                <FormLabel className="font-normal leading-normal">
-                                                {item.label}
-                                                </FormLabel>
-                                            </FormItem>
-                                            )
-                                        }}
-                                        />
-                                    ))}
-                                    <FormMessage />
+                                                control={form.control}
+                                                name="question9"
+                                                render={({ field }) => {
+                                                    const value = field.value ?? []; // Ensure field.value is an array
+                                                    return (
+                                                        <FormItem
+                                                            key={item.id}
+                                                            className="flex flex-row items-center space-x-3 space-y-0"
+                                                        >
+                                                            <FormControl>
+                                                                <Checkbox
+                                                                    checked={field.value?.includes(item.id)}
+                                                                    onCheckedChange={(checked) => {
+                                                                        return checked
+                                                                            ? field.onChange([...field.value, item.id])
+                                                                            : field.onChange(
+                                                                                field.value?.filter(
+                                                                                    (value) => value !== item.id
+                                                                                )
+                                                                            )
+                                                                    }}
+                                                                />
+                                                            </FormControl>
+                                                            <FormLabel className="font-normal leading-normal">
+                                                                {item.label}
+                                                            </FormLabel>
+                                                        </FormItem>
+                                                    )
+                                                }}
+                                            />
+                                        ))}
+                                        <FormMessage />
                                     </FormItem>
                                 )}
                             />
                         </div>
-                        
+
                         <div className="flex justify-end">
                             <Button type="submit">Berikutnya</Button>
                         </div>

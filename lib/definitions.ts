@@ -14,3 +14,8 @@ export type LineData = {
   color: string;
   size: number;
 }
+
+export type LoginData = {
+  email: string;
+  password: string;
+};

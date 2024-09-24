@@ -1,11 +1,11 @@
 import { type NextRequest } from 'next/server'
-import { updateSession } from '@/utils/supabase/middleware'
+import { updateSession } from '@/lib/supabase/middleware'
 
 export async function middleware(request: NextRequest) {
     return await updateSession(request)
 }
 
-// Only demo page required to login, can add more later
+// Pages that require authentication
 export const config = {
     matcher: ['/kuisioner', '/demo', '/evaluasi'],
 }

@@ -7,33 +7,10 @@ export async function POST(req: Request) {
     const { messages, data } = await req.json();
     const initialMessages = messages.slice(0, -1);
     const currentMessage = messages[messages.length - 1];
-    const appendCanvasImage = (messages: any[]) => {
-        const lastUserMessageIndex = messages.map(message => message.role).lastIndexOf('user');
-        if (lastUserMessageIndex !== -1 && data?.imageUrl) {
-            const currentMessage = messages[lastUserMessageIndex].content;
-            console.log('Current message:', messages[lastUserMessageIndex]);
-            messages[lastUserMessageIndex].content = [
-                {
-                    type: 'text',
-                    text: currentMessage
-                },
-                // {
-                //     type: 'image',
-                //     image: data.imageUrl,
-                //     experimental_providerMetadata: {
-                //         openai: { imageDetail: 'low' }
-                //     }
-                // }
-            ];
-        }
-
-        console.log('message:', messages);
-        return messages;
-    };
-
+    const model = process.env.OPENAI_GPT_MODEL ?? 'gpt-4o-mini';
 
     const result = await streamText({
-        model: openai(process.env.OPENAI_GPT_MODEL ?? 'gpt-4o-mini'),
+        model: openai(model),
         system: `You are a helpful math tutor.
         
         Users will interact with you by sending images of their handwritten solutions on a digital canvas so you technically see the image. 
@@ -51,7 +28,6 @@ export async function POST(req: Request) {
         Keep responses short and concise. Answer in a single sentence where possible.
         If you are unsure, use the getInformation tool and you can use common sense to reason based on the information you do have.
         Use your abilities as a reasoning machine to answer questions based on the information you do have.`,
-        // messages: convertToCoreMessages((messages)),
         messages: [
             ...convertToCoreMessages(initialMessages),
             {
@@ -76,7 +52,7 @@ export async function POST(req: Request) {
                 }),
                 execute: async ({ query }) => {
                     const { object } = await generateObject({
-                        model: openai("gpt-4o"),
+                        model: openai(model),
                         system:
                             "You are a query understanding assistant. Analyze the user query and generate rewritten question.",
                         schema: z.object({

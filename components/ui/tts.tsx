@@ -80,7 +80,6 @@ const TTS = forwardRef((props: TTSProps, ref) => {
     };
 
     const fetchAudio = async (text: string, language: string): Promise<ReadableStream<Uint8Array> | null> => {
-        console.log('Fetching audio: %s', text);
         const response = await fetch('/api/tts', {
             method: 'POST',
             headers: {
@@ -196,6 +195,7 @@ const TTS = forwardRef((props: TTSProps, ref) => {
     useImperativeHandle(ref, () => ({
         generateTTS: async (text: string, language: string) => {
             setLoading(true);
+            console.log('generateTTS:', text);
             const newTask: TTSQueueItem = {
                 id: ++ttsQueueSequence.current,
                 text: text,

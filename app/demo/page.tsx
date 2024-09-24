@@ -1,4 +1,3 @@
-import { Metadata } from "next"
 import Image from "next/image"
 import React, { useCallback, useRef, useState } from 'react';
 
@@ -6,11 +5,6 @@ import { Separator } from "@/components/ui/separator"
 import { UserNav } from "@/components/ui/user-nav"
 import { MainNav } from "@/components/ui/main-nav"
 import Playground from "@/components/ui/playground"
-
-export const metadata: Metadata = {
-    title: "TutorAI",
-    description: "Chatbot System with Retrieval Augmentent Generation for Enhanced Self-Learning Experience",
-}
 
 export default function Main() {
     return (
