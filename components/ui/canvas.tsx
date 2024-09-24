@@ -17,6 +17,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { ColorPicker } from "@/components/ui/color-picker"
+import { Image as KonvaImage } from 'react-konva';
 
 function Canvas(props: CanvasProps) {
   const stageParentRef = useRef<HTMLDivElement>(null);
@@ -84,7 +85,6 @@ function Canvas(props: CanvasProps) {
       y: (pos.y - stage.y()) / scale,
     };
 
-    // Store the current color in the line data
     setLines(prevLines => [...prevLines, { tool, points: [adjustedPos.x, adjustedPos.y], color: colorRef.current, size: strokeWidth }]);
   };
 
@@ -209,7 +209,7 @@ function Canvas(props: CanvasProps) {
                   <Button variant="ghost" size="icon" className="w-full">
                     <LineHeightIcon className="h-4 w-4" />
                   </Button>
-              </PopoverTrigger>
+                </PopoverTrigger>
               </TooltipWrapper>
               <PopoverContent className="w-64">
                 <div className="flex flex-col space-y-2">
@@ -272,8 +272,23 @@ function Canvas(props: CanvasProps) {
                     width={dimensions.width / scale}
                     height={dimensions.height / scale}
                     listening={false}
-                    fill={"#FAFAFA"}
+                    fill={props.backgroundColor}
                   />
+                  {props.questionsSheetImageSource && (
+                    <KonvaImage
+                    image={props.questionsSheetImageSource}
+                    x={5}
+                    y={10}
+                    height={(dimensions.height * 0.75) / scale}
+                    width={
+                      props.questionsSheetImageSource instanceof HTMLImageElement
+                        ? props.questionsSheetImageSource.width * ((dimensions.height * 0.75) / scale) / props.questionsSheetImageSource.height
+                        : undefined // Fallback in case it's not an HTMLImageElement
+                    }
+                    scaleX={scale}
+                    scaleY={scale}
+                  />              
+                  )}
                   {lines.map((line, i) => (
                     <Line
                       key={i}

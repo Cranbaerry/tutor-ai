@@ -45,7 +45,7 @@ export default function PetunjukPengunaan(){
 
                     <Link 
                         className={`${buttonVariants({ variant: "default" })} cursor-pointer`} 
-                        href="/demo">
+                        href="/playground">
                         Mulai Coba
                     </Link>
                 </div>

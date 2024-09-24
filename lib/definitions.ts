@@ -1,6 +1,7 @@
 export type CanvasProps = {
   backgroundColor: string;
   canvasRef: any;
+  questionsSheetImageSource?: CanvasImageSource | null;
 }
 
 export type CanvasWrapperProps = {

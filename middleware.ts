@@ -7,5 +7,5 @@ export async function middleware(request: NextRequest) {
 
 // Pages that require authentication
 export const config = {
-    matcher: ['/kuisioner', '/demo', '/evaluasi'],
+    matcher: ['/kuisioner', '/playground', '/evaluasi'],
 }

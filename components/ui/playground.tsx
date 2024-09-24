@@ -16,6 +16,7 @@ import dynamic from 'next/dynamic';
 import { Badge } from "@/components/ui/badge"
 import { CreateMessage, Message, useChat } from 'ai/react';
 import { ChatRequestOptions, JSONValue } from "ai";
+import { toast } from "sonner";
 import { findRelevantContent } from '@/lib/embeddings';
 import { Button } from "@/components/ui/button"
 
@@ -51,6 +52,8 @@ export default function Playground() {
         startExternalAudioVisualization: (stream: MediaStream) => void;
     }>();
 
+    
+    const [questionSheetImageSource, setQuestionSheetImageSource] = useState<HTMLImageElement | null>(null);
     const [pauseTimer, setPauseTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
     const [status, setStatus] = useState<'Listening' | 'Speak to interrupt' | 'Processing'>('Listening');
     const [activeStream, setActiveStream] = useState<'user' | 'bot' | null>('user');
@@ -63,6 +66,15 @@ export default function Playground() {
         browserSupportsSpeechRecognition,
         isMicrophoneAvailable
     } = useSpeechRecognition();
+
+    const loadImage = (url: string): Promise<HTMLImageElement> => {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.src = url;
+            img.onload = () => resolve(img);
+            img.onerror = reject;
+        });
+    };
 
     const sendTranscript = async () => {
         if (finalTranscript.trim() !== '') {
@@ -130,17 +142,13 @@ export default function Playground() {
             language: language
         });
 
-        // if (ttsRef.current) {
-        //     switch(language) {
-        //         case 'id-ID':
-        //             ttsRef.current.generateTTS('Selamat datang di BEExpert!', language);
-        //             break;
-        //         default:
-        //             ttsRef.current.generateTTS('Welcome to BEExpert!', language);
-        //             break;
-        //     }            
-        // }
-
+        loadImage('/soal/laws-of-sine.png').then((image) => {
+            setQuestionSheetImageSource(image);
+            toast.info("Question sheet succesfully loaded!")
+        }).catch((error) => {
+            toast.error("Failed to load sheet, please refresh and try again..")
+        });;
+        
         return () => {
             SpeechRecognition.stopListening();
             if (pauseTimer) {
@@ -221,7 +229,7 @@ export default function Playground() {
                 </AlertDialog>
             }
 
-            <Canvas backgroundColor={'#FAFAFA'} canvasRef={canvasRef} />
+            <Canvas backgroundColor={'#FFFFFF'} canvasRef={canvasRef} questionsSheetImageSource={questionSheetImageSource} />
             <div className="fixed flex bottom-8 left-24 items-center space-x-2">
                 <TTS ref={ttsRef} width={50} height={40} onPlayingStatusChange={handleTTSPlayingStatusChange} onReadingTextChange={handleTTSOnReadingTextChange} />
                 <Badge>{status}</Badge>
