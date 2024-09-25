@@ -56,7 +56,7 @@ export default function Playground() {
     const [pauseTimer, setPauseTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
     const [status, setStatus] = useState<'Listening' | 'Speak to interrupt' | 'Processing'>('Listening');
     const [activeStream, setActiveStream] = useState<'user' | 'bot' | null>('user');
-    const [language, setLanguage] = useState<'en-US' | 'id-ID'>('en-US');
+    const [language, setLanguage] = useState<'en-US' | 'id-ID'>('id-ID');
     const {
         transcript,
         finalTranscript,

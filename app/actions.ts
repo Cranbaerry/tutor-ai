@@ -20,7 +20,6 @@ export async function signInWithPassword({ email, password }: LoginData) {
 
 export async function signInWithOAuth(provider: Provider = 'google') {
     const supabase = createClient()
-    console.info('Callback URL', process.env.OAUTH_CALLBACK_URL);
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: provider,
         options: {
