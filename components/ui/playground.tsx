@@ -145,7 +145,7 @@ export default function Playground() {
             language: language
         });
 
-        loadImage('/soal/laws-of-sine.png').then((image) => {
+        loadImage('/soal/identitas-trigonometri.png').then((image) => {
             setQuestionSheetImageSource(image);
             toast.info("Question sheet succesfully loaded!")
         }).catch((error) => {
