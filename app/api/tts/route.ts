@@ -5,8 +5,7 @@ export async function POST(req: Request) {
     const tts = new MsEdgeTTS();
 
     // VOICE LIST: https://gist.github.com/BettyJJ/17cbaa1de96235a7f5773b8690a20462
-    console.info('Speech lang:', process.env[`AZURE_SPEECH_SERVICE_${language}`]);
-    const voiceName = process.env[`AZURE_SPEECH_SERVICE_${language}`] ?? 'en-US-JennyNeural';
+    const voiceName = language === 'en-US' ? 'en-US-JennyNeural' : 'id-ID-ArdiNeural';
     await tts.setMetadata(voiceName, OUTPUT_FORMAT.WEBM_24KHZ_16BIT_MONO_OPUS);
 
     const readable = tts.toStream(text);
