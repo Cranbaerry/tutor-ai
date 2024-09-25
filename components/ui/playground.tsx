@@ -86,7 +86,10 @@ export default function Playground() {
             };
 
             const options: ChatRequestOptions = {
-                data: { imageUrl: canvasDataUrl as JSONValue },
+                data: { 
+                    imageUrl: canvasDataUrl as JSONValue,
+                    language: language as JSONValue
+                 },
             };
 
             console.log('Sending transcript:', finalTranscript);

@@ -7,6 +7,7 @@ export async function POST(req: Request) {
     const { messages, data } = await req.json();
     const initialMessages = messages.slice(0, -1);
     const currentMessage = messages[messages.length - 1];
+    const language = data.language === 'en-US' ? 'English' : 'Indonesian';
     const model = process.env.OPENAI_GPT_MODEL ?? 'gpt-4o-mini';
 
     const result = await streamText({
@@ -20,6 +21,7 @@ export async function POST(req: Request) {
         Do not use LaTeX formatting.
         Do not use list format.
         Do not hallucinate.
+        You must reply back in ${language} language.
         
         If a response requires information from an additional tool to generate a response, call the appropriate tools in order before responding to the user.
         ONLY respond to questions using information from tool calls.
