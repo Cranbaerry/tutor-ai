@@ -18,7 +18,8 @@ import { CreateMessage, Message, useChat } from 'ai/react';
 import { ChatRequestOptions, JSONValue } from "ai";
 import { toast } from "sonner";
 import { findRelevantContent } from '@/lib/embeddings';
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
+import { LanguageCode } from "@/lib/definitions";
 
 const Canvas = dynamic(() => import('@/components/ui/canvas'), {
     ssr: false,
@@ -56,7 +57,7 @@ export default function Playground() {
     const [pauseTimer, setPauseTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
     const [status, setStatus] = useState<'Listening' | 'Speak to interrupt' | 'Processing'>('Listening');
     const [activeStream, setActiveStream] = useState<'user' | 'bot' | null>('user');
-    const [language, setLanguage] = useState<'en-US' | 'id-ID'>('id-ID');
+    const [language, setLanguage] = useState<LanguageCode>('id-ID');
     const {
         transcript,
         finalTranscript,

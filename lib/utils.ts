@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { createClient } from "./supabase/client";
+import { languages, LanguageDetails } from "./definitions";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -15,4 +16,8 @@ export async function getUserData() {
   //     user
   // ) : null;
   return user;
+}
+
+export function getLanguageDetailsById(id: string): LanguageDetails | undefined {
+  return languages.find(lang => lang.id === id);
 }

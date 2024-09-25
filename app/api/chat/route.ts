@@ -2,12 +2,14 @@ import { convertToCoreMessages, streamText, tool, generateObject, UserContent } 
 import { openai } from '@ai-sdk/openai';
 import { findRelevantContent } from '@/lib/embeddings';
 import { z } from 'zod';
+import { getLanguageDetailsById } from '@/lib/utils';
 
 export async function POST(req: Request) {
     const { messages, data } = await req.json();
     const initialMessages = messages.slice(0, -1);
     const currentMessage = messages[messages.length - 1];
-    const language = data.language === 'en-US' ? 'English' : 'Indonesian';
+    const langDetails = getLanguageDetailsById(data.language);
+    const language = langDetails?.name ?? 'Indonesian';
     const model = process.env.OPENAI_GPT_MODEL ?? 'gpt-4o-mini';
 
     const result = await streamText({
