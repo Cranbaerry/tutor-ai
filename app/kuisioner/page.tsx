@@ -17,7 +17,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { agreements, question5, question6, question7, question9 } from "./options"
 import { useRouter } from 'next/navigation'
-import { insert } from './actions'
+import { insert, isQuestionareFinished } from './actions'
 import { useEffect, useState } from 'react';
 import { toast } from "sonner"
 import type { InferGetServerSidePropsType, GetServerSideProps } from 'next'
@@ -80,11 +80,18 @@ export default function Kuisioner() {
 
     useEffect(() => {
         const fetchData = async () => {
+            const skipProcess = await isQuestionareFinished();
+
+            if (skipProcess){
+                // toast.info("Info", { description: `Data telah disimpan sebelumnya` });
+                router.push("/petunjuk-penggunaan")
+            }
+
             const user = await getUserData();
             if (user != null) {
                 setFullname(user.user_metadata.full_name)
                 setEmail(user.email ?? null)
-            } 
+            }
         }
         fetchData()
     }, [])

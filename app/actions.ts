@@ -29,21 +29,3 @@ export async function signInWithOAuth(provider: Provider = 'google') {
 
     return { data, error: error ? error.message : null };
 }
-
-// Unused?
-// export async function handleSignInWithGoogle(code: string) {
-//     const supabase = createClient()
-
-//     const { data, error } = await supabase.auth.signInWithIdToken({
-//         provider: 'google',
-//         token: code,
-//     })
-
-//     if (error) {
-//         console.log(error.message);
-//         return false;
-//     }
-
-//     revalidatePath('/', 'layout')
-//     return true;
-// }
