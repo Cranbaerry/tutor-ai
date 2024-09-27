@@ -6,6 +6,10 @@ import Image from "next/image"
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/ui/header";
 import dynamic from "next/dynamic";
+import { toast } from "sonner";
+import { insert } from "./actions";
+import { uploadImage } from "@/lib/supabase/storage/client";
+import { convertCanvasUriToFile, getUserData } from "@/lib/utils";
 
 const Canvas = dynamic(() => import('@/components/ui/canvas'), {
   ssr: false,
@@ -13,25 +17,61 @@ const Canvas = dynamic(() => import('@/components/ui/canvas'), {
 
 export default function PostTest() {
   const [selectedAnswer, setSelectedAnswer] = useState("")
+  const [selectedOption, setSelectedOption] = useState<string>("")
+
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
+
   const router = useRouter();
   const correctAnswer = "sin(30)"
 
   const options = [
-    { letter: "A", city: "sin(90)" },
-    { letter: "B", city: "cos(30)" },
-    { letter: "C", city: "sin(30)" },
-    { letter: "D", city: "cos(45)" },
+    { letter: "A", opt: "sin(90)" },
+    { letter: "B", opt: "cos(30)" },
+    { letter: "C", opt: "sin(30)" },
+    { letter: "D", opt: "cos(45)" },
   ]
 
   const canvasRef = useRef<{
     handleExport: () => string
   }>(null)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleAnswer = (opt: string, letter: string) => {
+    if(!submitted){
+      setSelectedAnswer(opt)
+      setSelectedOption(letter)
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setLoading(true)
+
+    const user = await getUserData()
+    const canvasDataUrl = canvasRef.current?.handleExport();
+    
+    const canvasFile = convertCanvasUriToFile(canvasDataUrl, user?.id)
+    const { imageUrl, error } = await uploadImage({
+      file: canvasFile,
+      bucket: "post-test",
+    });
+
+    if (error) {
+      console.error(error);
+      setLoading(false)
+      return;
+    }
+
+    const values = {
+      option: selectedOption,
+      answer: selectedAnswer,
+      isCorrect: selectedAnswer === correctAnswer,
+      imageUrl: imageUrl
+    }
+    insert(values)
+    toast.success('Success', { description: 'Data berhasil disimpan!' })
     setSubmitted(true)
+    setLoading(false)
   }
 
   const handleNext = () => {
@@ -40,16 +80,16 @@ export default function PostTest() {
     setLoading(false)
   }
 
-  const getOptionStyle = (city: string) => {
+  const getOptionStyle = (opt: string) => {
     if (!submitted) {
-      return selectedAnswer === city
+      return selectedAnswer === opt
         ? "bg-green-500 text-white border-green-500"
         : "bg-white text-black border-black"
     }
-    if (city === correctAnswer) {
+    if (opt === correctAnswer) {
       return "bg-green-500 text-white border-green-500"
     }
-    if (selectedAnswer === city && city !== correctAnswer) {
+    if (selectedAnswer === opt && opt !== correctAnswer) {
       return "bg-red-500 text-white border-red-500"
     }
     return "bg-white text-black border-black"
@@ -76,22 +116,22 @@ export default function PostTest() {
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4 mt-8 mb-10" role="radiogroup">
-                  {options.map(({ letter, city }) => (
+                  {options.map(({ letter, opt }) => (
                     <button
                       key={letter}
                       type="button"
-                      onClick={() => !submitted && setSelectedAnswer(city)}
+                      onClick={() => handleAnswer(opt, letter)}
                       className={`w-full text-left px-4 py-2 rounded-md border ${getOptionStyle(
-                        city
+                        opt
                       )} transition-colors duration-200`}
                       role="radio"
-                      aria-checked={selectedAnswer === city}
+                      aria-checked={selectedAnswer === opt}
                       disabled={submitted}
                     >
                       <span className="inline-block w-6 h-6 mr-2 rounded-full border-2 border-current text-center leading-5">
                         {letter}
                       </span>
-                      {city}
+                      {opt}
                     </button>
                   ))}
                 </div>
@@ -114,7 +154,7 @@ export default function PostTest() {
                   <Button
                     type="submit"
                     className="w-full"
-                    disabled={!selectedAnswer || submitted}
+                    disabled={!selectedAnswer || submitted || loading}
                   >
                     Submit
                   </Button>
