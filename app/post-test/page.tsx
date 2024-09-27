@@ -1,10 +1,15 @@
 "use client"
 
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/ui/header";
+import dynamic from "next/dynamic";
+
+const Canvas = dynamic(() => import('@/components/ui/canvas'), {
+  ssr: false,
+})
 
 export default function PostTest() {
   const [selectedAnswer, setSelectedAnswer] = useState("")
@@ -19,6 +24,10 @@ export default function PostTest() {
     { letter: "C", city: "sin(30)" },
     { letter: "D", city: "cos(45)" },
   ]
+
+  const canvasRef = useRef<{
+    handleExport: () => string
+  }>(null)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -47,84 +56,86 @@ export default function PostTest() {
   }
 
   return (
-    <>
+    <div className="flex flex-col min-h-screen bg-[rgb(245,245,245)]">
       <Header isFixed enableChangeLanguage={false} />
-      <main className="flex min-h-screen flex-row items-start justify-center p-20 bg-[rgb(245,245,245)]">
-          <div className="h-full w-3/4">
-              <div id="pre-test" className="rounded-md border-0 p-4 bg-[rgb(255,255,255)]">
-                  <h1 className="font-bold text-3xl mb-4">Post-Test</h1>
-                  <form onSubmit={handleSubmit}>
-                      <fieldset className="mb-4">
-                      <legend className="text-lg mb-2">
-                          Setelah kamu belajar dengan BEEXPERT, jawablah pertanyaan berikut tanpa menggunakan kalkulator dan bantuan apapun.
-                      </legend>
-                      <div className="flex items-center justify-center mt-2 mb-2">
-                        <Image
-                            src="/soal/post-test.png"
-                            alt="Post-test Question"
-                            width={974}
-                            height={93}
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4 mt-8 mb-10" role="radiogroup">
-                      {options.map(({ letter, city }) => (
-                          <button
-                              key={letter}
-                              type="button"
-                              onClick={() => !submitted && setSelectedAnswer(city)}
-                              className={`w-full text-left px-4 py-2 rounded-md border ${getOptionStyle(
-                              city
-                              )} transition-colors duration-200`}
-                              role="radio"
-                              aria-checked={selectedAnswer === city}
-                              disabled={submitted}
-                          >
-                              <span className="inline-block w-6 h-6 mr-2 rounded-full border-2 border-current text-center leading-5">
-                              {letter}
-                              </span>
-                              {city}
-                          </button>
-                      ))}
-                      </div>
-                      </fieldset>
-
-                      {
-                        !submitted ? (
-                          <Button
-                            type="submit"
-                            className="w-full"
-                            disabled={!selectedAnswer || submitted}
-                          >
-                            Submit
-                          </Button>
-                        ) : (
-                          <Button
-                            type="button"
-                            className="w-full"
-                            onClick={handleNext}
-                            disabled={loading}
-                          >
-                            Next
-                          </Button>
-                        )
-                      }
-                  </form>
-                  {submitted && (
-                      <div className="mt-4">
-                      {selectedAnswer === correctAnswer ? (
-                          <p className="text-green-600" role="alert">
-                          Selamat, jawabanmu benar!
-                          </p>
-                      ) : (
-                          <p className="text-red-600" role="alert">
-                          Jawabanmu kurang tepat. Jawaban yang benar adalah {correctAnswer}. Terima kasih sudah mencoba.
-                          </p>
-                      )}
-                      </div>
+      <main className="flex flex-grow pt-20 px-10 pb-10 space-x-8">
+        <div className="w-1/2 flex flex-col">
+          <div id="pre-test" className="flex-grow rounded-md border-0 p-4 bg-white">
+            <h1 className="font-bold text-3xl mb-4">Post-Test</h1>
+            <form onSubmit={handleSubmit} className="flex flex-col h-full">
+              <fieldset className="mb-4 flex-grow">
+                <legend className="text-lg mb-2">
+                  Setelah kamu belajar dengan BEEXPERT, jawablah pertanyaan berikut tanpa menggunakan kalkulator dan bantuan apapun.
+                </legend>
+                <div className="flex items-center justify-center mt-2 mb-2">
+                  <Image
+                    src="/soal/post-test.png"
+                    alt="Pre-test Question"
+                    width={504}
+                    height={78}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4 mt-8 mb-10" role="radiogroup">
+                  {options.map(({ letter, city }) => (
+                    <button
+                      key={letter}
+                      type="button"
+                      onClick={() => !submitted && setSelectedAnswer(city)}
+                      className={`w-full text-left px-4 py-2 rounded-md border ${getOptionStyle(
+                        city
+                      )} transition-colors duration-200`}
+                      role="radio"
+                      aria-checked={selectedAnswer === city}
+                      disabled={submitted}
+                    >
+                      <span className="inline-block w-6 h-6 mr-2 rounded-full border-2 border-current text-center leading-5">
+                        {letter}
+                      </span>
+                      {city}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+              {submitted && (
+                <div className="mb-4">
+                  {selectedAnswer === correctAnswer ? (
+                    <p className="text-green-600" role="alert">
+                      Selamat, jawabanmu benar! Yuk, belajar lebih dalam lagi dengan BEEXPERT di halaman selanjutnya!
+                    </p>
+                  ) : (
+                    <p className="text-red-600" role="alert">
+                      Jawabanmu kurang tepat. Jawaban yang benar adalah {correctAnswer}. Yuk, mulai belajar dengan BEEXPERT di halaman selanjutnya!
+                    </p>
                   )}
+                </div>
+              )}
+              <div className="mt-auto mb-[55px]">
+                {!submitted ? (
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={!selectedAnswer || submitted}
+                  >
+                    Submit
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    className="w-full"
+                    onClick={handleNext}
+                    disabled={loading}
+                  >
+                    Next
+                  </Button>
+                )}
               </div>
+            </form>
           </div>
+        </div>
+        <div className="w-1/2">
+          <Canvas backgroundColor={'#FFFFFF'} canvasRef={canvasRef} questionsSheetImageSource={null}/>
+        </div>
       </main>
-    </>
+    </div>
   )
 }
