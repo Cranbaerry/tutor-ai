@@ -146,6 +146,13 @@ export default function Main() {
             },
             target: '.tool__zoom_out',
             title: <h2 className='font-bold'>Tool: Zoom Out</h2>,
+          },
+          {
+            content: <span className='text-sm'>Kamu bisa mulai berinteraksi dengan menyapa BEEXPERT terlebih dahulu.</span>,
+            locale: { skip: <strong aria-label="skip">Skip</strong>, last: <strong aria-label="skip">Done</strong> },
+            placement: 'center',
+            target: 'body',
+            title: <h2 className='font-bold'>Siap Belajar</h2>
           }
         ],
     });
@@ -176,7 +183,6 @@ export default function Main() {
                 callback={handleJoyrideCallback}
                 continuous
                 run={run}
-                scrollToFirstStep
                 showProgress
                 showSkipButton
                 steps={steps}
