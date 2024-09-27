@@ -25,7 +25,11 @@ const Canvas = dynamic(() => import('@/components/ui/canvas'), {
     ssr: false,
 });
 
-export default function Playground() {
+interface IPlaygroundProps {
+    language: LanguageCode;
+}
+
+export default function Playground({language}: IPlaygroundProps) {
     const [toolCall, setToolCall] = useState<string>();
     const { messages, input, handleInputChange, handleSubmit, append } = useChat({
         onToolCall({ toolCall }) {
@@ -57,7 +61,7 @@ export default function Playground() {
     const [pauseTimer, setPauseTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
     const [status, setStatus] = useState<'Listening' | 'Speak to interrupt' | 'Processing'>('Listening');
     const [activeStream, setActiveStream] = useState<'user' | 'bot' | null>('user');
-    const [language, setLanguage] = useState<LanguageCode>('id-ID');
+
     const {
         transcript,
         finalTranscript,
@@ -151,7 +155,6 @@ export default function Playground() {
         }).catch((error) => {
             toast.error("Failed to load sheet, please refresh and try again..")
         });;
-        
         return () => {
             SpeechRecognition.stopListening();
             if (pauseTimer) {

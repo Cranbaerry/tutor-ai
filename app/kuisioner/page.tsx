@@ -85,7 +85,7 @@ export default function Kuisioner() {
 
             if (skipProcess){
                 // toast.info("Info", { description: `Data telah disimpan sebelumnya` });
-                router.push("/petunjuk-penggunaan")
+                router.push("/pre-test")
             }
 
             const user = await getUserData();
@@ -123,7 +123,7 @@ export default function Kuisioner() {
 
     return (
         <>
-            <Header isFixed />
+            <Header isFixed enableChangeLanguage={false} />
             <main className="flex min-h-screen flex-row items-start justify-between p-20 bg-[rgb(245,245,245)]">
                 <NavigationMenu className="w-1/4">
                     <NavigationMenuList className="flex-col items-start fixed top-25 left-10">
