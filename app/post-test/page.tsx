@@ -48,7 +48,7 @@ export default function PostTest() {
 
   return (
     <>
-      <Header isFixed />
+      <Header isFixed enableChangeLanguage={false} />
       <main className="flex min-h-screen flex-row items-start justify-center p-20 bg-[rgb(245,245,245)]">
           <div className="h-full w-3/4">
               <div id="pre-test" className="rounded-md border-0 p-4 bg-[rgb(255,255,255)]">
