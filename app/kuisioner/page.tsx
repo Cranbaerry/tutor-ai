@@ -214,7 +214,7 @@ export default function Kuisioner() {
                                         <FormItem>
                                             <FormLabel>Nama Lengkap</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="John Doe" {...field} defaultValue={fullname!} />
+                                                <Input placeholder="John Doe" {...field} value={fullname!} onChange={e => setFullname(e.target.value)} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -228,7 +228,7 @@ export default function Kuisioner() {
                                         <FormItem>
                                             <FormLabel>Email</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="johndoe@email.com" {...field} disabled defaultValue={email!} />
+                                                <Input placeholder="johndoe@email.com" {...field} disabled value={email!} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
