@@ -94,7 +94,7 @@ export async function isQuestionareFinished(){
 
     const { data, error } = await query;
     if (error) throw error;
-    console.log(data[0].questionnaires[0].id)
+    console.log(data[0]?.questionnaires[0]?.id)
 
     if (data == null || data.length == 0){
         return false;
