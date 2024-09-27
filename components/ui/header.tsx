@@ -10,7 +10,7 @@ interface IHeaderProps{
     onChangeLanguage?: (language: LanguageCode) => void;
 }
 
-export const Header = React.forwardRef<HTMLDivElement, IHeaderProps>(
+const Header = React.forwardRef<HTMLDivElement, IHeaderProps>(
     ({ isFixed, enableChangeLanguage, onChangeLanguage }, ref) => {
 
     const noChangeLanguage = () => {}
@@ -42,3 +42,6 @@ export const Header = React.forwardRef<HTMLDivElement, IHeaderProps>(
         )   
     }
 )
+
+Header.displayName = 'Header';
+export { Header };

@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog"
 import { DialogClose } from "@radix-ui/react-dialog"
 
-export function DialogDemo() {
+function DialogDemo() {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -41,3 +41,6 @@ export function DialogDemo() {
     </Dialog>
   )
 }
+
+DialogDemo.displayName = 'DialogDemo';
+export { DialogDemo };
