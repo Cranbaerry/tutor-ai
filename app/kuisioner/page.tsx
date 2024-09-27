@@ -90,7 +90,8 @@ export default function Kuisioner() {
 
             const user = await getUserData();
             if (user != null) {
-                setFullname(user.user_metadata.full_name)
+                if(user.user_metadata.full_name != null)
+                    setFullname(user.user_metadata.full_name)
                 setEmail(user.email ?? null)
             }
         }
@@ -213,7 +214,7 @@ export default function Kuisioner() {
                                         <FormItem>
                                             <FormLabel>Nama Lengkap</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="John Doe" {...field} value={fullname!} />
+                                                <Input placeholder="John Doe" {...field} defaultValue={fullname!} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -227,7 +228,7 @@ export default function Kuisioner() {
                                         <FormItem>
                                             <FormLabel>Email</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="johndoe@email.com" {...field} disabled value={email!} />
+                                                <Input placeholder="johndoe@email.com" {...field} disabled defaultValue={email!} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
