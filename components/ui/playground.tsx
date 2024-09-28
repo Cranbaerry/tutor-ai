@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { findRelevantContent } from '@/lib/embeddings';
 import { Button } from "@/components/ui/button";
 import { LanguageCode } from "@/lib/definitions";
+import { DialogFinalAnswer } from "./final-answer-dialog";
 
 const Canvas = dynamic(() => import('@/components/ui/canvas'), {
     ssr: false,
@@ -241,6 +242,9 @@ export default function Playground({language}: IPlaygroundProps) {
                 <Badge>{status}</Badge>
                 <div className="text-helper">
                     <span className="status mx-1">{activeStream === 'user' ? transcript : currentlyPlayingTTSText}</span>
+                </div>
+                <div className="fixed right-8 bottom-10">
+                    <DialogFinalAnswer canvasRef={canvasRef} />
                 </div>
             </div>
         </>
