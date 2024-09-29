@@ -17,11 +17,10 @@ import { Badge } from "@/components/ui/badge"
 import { CreateMessage, Message, useChat } from 'ai/react';
 import { ChatRequestOptions, JSONValue } from "ai";
 import { toast } from "sonner";
-import { findRelevantContent } from '@/lib/embeddings';
-import { Button } from "@/components/ui/button";
 import { LanguageCode } from "@/lib/definitions";
 import { useTabActive } from "@/hooks/use-tab-active";
 import { DialogFinalAnswer } from "./final-answer-dialog";
+import { Icons } from "@/components/ui/icons";
 
 const Canvas = dynamic(() => import('@/components/ui/canvas'), {
     ssr: false,
@@ -31,7 +30,7 @@ interface IPlaygroundProps {
     language: LanguageCode;
 }
 
-export default function Playground({language}: IPlaygroundProps) {
+export default function Playground({ language }: IPlaygroundProps) {
     const [toolCall, setToolCall] = useState<string>();
     const { messages, input, handleInputChange, handleSubmit, append } = useChat({
         onToolCall({ toolCall }) {
@@ -63,7 +62,7 @@ export default function Playground({language}: IPlaygroundProps) {
     const [pauseTimer, setPauseTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
     const [status, setStatus] = useState<'Listening' | 'Speak to interrupt' | 'Processing'>('Listening');
     const [activeStream, setActiveStream] = useState<'user' | 'bot' | null>('user');
-
+    const [isEmbeddingModelActive, setIsEmbeddingModelActive] = useState<boolean>(false);
     const {
         transcript,
         finalTranscript,
@@ -151,7 +150,29 @@ export default function Playground({language}: IPlaygroundProps) {
         }).catch((error) => {
             toast.error("Failed to load sheet, please refresh and try again..")
         });;
+
+        handleEmbeddingModelLoad();
     }, []);
+
+    const handleEmbeddingModelLoad = async () => {
+        setIsEmbeddingModelActive(false); // Initially set to false
+        const callApiUntilOk = async () => {
+            try {
+                const response = await fetch('/api/test');
+
+                if (response.ok) {
+                    setIsEmbeddingModelActive(true);
+                    return;
+                }
+            } catch (error) {
+                console.error('API call failed', error);
+            }
+
+            setTimeout(callApiUntilOk, 1000);
+        };
+
+        callApiUntilOk();
+    };
 
     useEffect(() => {
         if (activeStream === 'user') {
@@ -208,37 +229,44 @@ export default function Playground({language}: IPlaygroundProps) {
     }
     return (
         <>
-            {!browserSupportsSpeechRecognition &&
-                <AlertDialog defaultOpen={true}>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Browser not supported</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                Your browser doesn&apos;t support speech recognition. For a smooth experience, please try using the latest version of Google Chrome or Microsoft Edge.
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogAction>Got it!</AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
-            }
+            <AlertDialog open={!browserSupportsSpeechRecognition}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Browser not supported</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Your browser doesn&apos;t support speech recognition. For a smooth experience, please try using the latest version of Google Chrome or Microsoft Edge.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogAction>Got it!</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
 
-            {!isMicrophoneAvailable &&
-                <AlertDialog defaultOpen={true}>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Microphone not recognized</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                Please allow this web page to use your microphone before transcription can begin.
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogAction>Got it!</AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
-            }
+            <AlertDialog open={!isMicrophoneAvailable}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Microphone not recognized</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Please allow this web page to use your microphone before transcription can begin.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogAction>Got it!</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            <AlertDialog open={!isEmbeddingModelActive}>
+                <AlertDialogContent className="max-w-md">
+                    <AlertDialogHeader>
+                        <AlertDialogDescription className="flex flex-col items-center space-y-4">
+                        <Icons.spinner className="h-14 w-14 animate-spin" />
+                            <p>Please wait while we load embedding model...</p>
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                </AlertDialogContent>
+            </AlertDialog>
 
             <Canvas backgroundColor={'#FFFFFF'} canvasRef={canvasRef} questionsSheetImageSource={questionSheetImageSource} />
             <div className="fixed flex bottom-8 left-24 items-center space-x-2">

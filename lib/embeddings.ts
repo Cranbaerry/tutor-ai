@@ -25,7 +25,6 @@ export const vectorStore = new SupabaseVectorStore(embeddings, {
 });
 
 export const findRelevantContent = async (userQuery: string) => {
-  console.log('Querying:', userQuery);
   const similarGuides = await vectorStore.similaritySearch(userQuery, 5);
   return similarGuides;
 }
