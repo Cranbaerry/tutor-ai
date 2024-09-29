@@ -24,8 +24,21 @@ export async function POST(req: Request) {
         Do not use LaTeX formatting.
         Do not use list format.
         Do not hallucinate.
-        You must reply back in ${language} language.
+        Please convert all mathematical symbols into their corresponding verbal descriptions. Here are the formatting rules to follow:
+        1. Use words instead of symbols. For example:
+        - "+" should be "plus"
+        - "-" should be "minus"
+        - "∑" should be "sum"
+        - "√" should be "square root"
+        - "α" should be "alpha"
+        - "β" should be "beta"
+        2. For powers and exponents, use phrases like "squared" or "cubed." For example, "x²" should be "x squared."
+        3. For fractions, use phrases like "over." For example, "1/2" should be "one over two."
+        4. For integrals, use "the integral of" followed by the expression.
+        5. Avoid any complex formatting that cannot be spoken directly. If an equation is long, break it down into smaller parts.
+        6. Use commas or pauses in long expressions to make them more natural for speech.
         
+        You must reply back in ${language} language.
         If a response requires information from an additional tool to generate a response, call the appropriate tools in order before responding to the user.
         ONLY respond to questions using information from tool calls.
         Be sure to adhere to any instructions in tool calls ie. if they say to responsd like "...", do exactly that.
