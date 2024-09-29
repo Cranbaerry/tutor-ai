@@ -171,7 +171,7 @@ function Canvas(props: CanvasProps) {
                 onClick={() => setTool('drag')}
                 variant={tool === 'drag' ? 'default' : 'ghost'}
                 size="icon"
-                className="w-full"
+                className="tool__drag w-full"
               >
                 <HandIcon className="h-4 w-4" />
               </Button>
@@ -181,7 +181,7 @@ function Canvas(props: CanvasProps) {
                 onClick={() => setTool('pencil')}
                 variant={tool === 'pencil' ? 'default' : 'ghost'}
                 size="icon"
-                className="w-full"
+                className="tool__pencil w-full"
               >
                 <Pencil1Icon className="h-4 w-4" />
               </Button>
@@ -191,14 +191,14 @@ function Canvas(props: CanvasProps) {
                 onClick={() => setTool('eraser')}
                 variant={tool === 'eraser' ? 'default' : 'ghost'}
                 size="icon"
-                className="w-full"
+                className="tool__eraser w-full"
               >
                 <EraserIcon className="h-4 w-4" />
               </Button>
             </TooltipWrapper>
             <Separator className="my-2" />
             <TooltipWrapper content="Color">
-              <div className="flex justify-center">
+              <div className="tool__color flex justify-center">
                 <ColorPicker color={colorRef.current} onChange={handleColorChange} />
               </div>
             </TooltipWrapper>
@@ -206,7 +206,7 @@ function Canvas(props: CanvasProps) {
             <Popover>
               <TooltipWrapper content="Stroke Width">
                 <PopoverTrigger asChild>
-                  <Button variant="ghost" size="icon" className="w-full">
+                  <Button variant="ghost" size="icon" className="tool__stroke_width w-full">
                     <LineHeightIcon className="h-4 w-4" />
                   </Button>
                 </PopoverTrigger>
@@ -229,23 +229,23 @@ function Canvas(props: CanvasProps) {
             </Popover>
             <Separator className="my-2" />
             <TooltipWrapper content="Undo">
-              <Button onClick={handleUndo} disabled={historyStep <= 0} size="icon" variant="ghost" className="w-full">
+              <Button onClick={handleUndo} disabled={historyStep <= 0} size="icon" variant="ghost" className="tool__undo w-full">
                 <ArrowLeftIcon className="h-4 w-4" />
               </Button>
             </TooltipWrapper>
             <TooltipWrapper content="Redo">
-              <Button onClick={handleRedo} disabled={historyStep >= history.length - 1} size="icon" variant="ghost" className="w-full">
+              <Button onClick={handleRedo} disabled={historyStep >= history.length - 1} size="icon" variant="ghost" className="tool__redo w-full">
                 <ArrowRightIcon className="h-4 w-4" />
               </Button>
             </TooltipWrapper>
             <Separator className="my-2" />
             <TooltipWrapper content="Zoom In">
-              <Button onClick={handleZoomIn} size="icon" variant="ghost" className="w-full">
+              <Button onClick={handleZoomIn} size="icon" variant="ghost" className="tool__zoom_in w-full">
                 <ZoomInIcon className="h-4 w-4" />
               </Button>
             </TooltipWrapper>
             <TooltipWrapper content="Zoom Out">
-              <Button onClick={handleZoomOut} size="icon" variant="ghost" className="w-full">
+              <Button onClick={handleZoomOut} size="icon" variant="ghost" className="tool__zoom_out w-full">
                 <ZoomOutIcon className="h-4 w-4" />
               </Button>
             </TooltipWrapper>

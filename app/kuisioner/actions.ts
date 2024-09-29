@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 
 import { createClient } from '@/lib/supabase/server'
 import formSchema from './page'
+import { QueryData } from '@supabase/supabase-js'
 
 export async function insert(values: any) {
     const supabase = createClient()
@@ -67,11 +68,41 @@ export async function insert(values: any) {
     if (questionError) {
         console.log(questionError.message);
         return false;
-        // redirect('/error')
     }
-
-    console.log('Insert Success!')
 
     return true;
 
+}
+
+// Kalau sudah ngisi form questionare awal gk perlu isi lagi
+// TODO NEXT: Skip berdasarkan progress penggunaan aplikasi
+export async function isQuestionareFinished(){
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (user == null) {
+        return false;
+    }
+
+    const query = supabase
+        .from('profiles')
+        .select(`id, whatsapp_number, questionnaires(id)`)
+        .eq("user_id", user.id ?? '')
+        .order('created_at', { ascending: false });
+
+    type Query = QueryData<typeof query>;
+
+    const { data, error } = await query;
+    if (error) throw error;
+    console.log(data[0]?.questionnaires[0]?.id)
+
+    if (data == null || data.length == 0){
+        return false;
+    } else {
+        if (data[0].id == null || data[0].questionnaires[0].id == null){
+            return false;
+        } else {
+            return true;
+        }
+    }
 }

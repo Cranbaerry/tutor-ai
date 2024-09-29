@@ -21,12 +21,17 @@ import { findRelevantContent } from '@/lib/embeddings';
 import { Button } from "@/components/ui/button";
 import { LanguageCode } from "@/lib/definitions";
 import { useTabActive } from "@/hooks/use-tab-active";
+import { DialogFinalAnswer } from "./final-answer-dialog";
 
 const Canvas = dynamic(() => import('@/components/ui/canvas'), {
     ssr: false,
 });
 
-export default function Playground() {
+interface IPlaygroundProps {
+    language: LanguageCode;
+}
+
+export default function Playground({language}: IPlaygroundProps) {
     const [toolCall, setToolCall] = useState<string>();
     const { messages, input, handleInputChange, handleSubmit, append } = useChat({
         onToolCall({ toolCall }) {
@@ -58,7 +63,7 @@ export default function Playground() {
     const [pauseTimer, setPauseTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
     const [status, setStatus] = useState<'Listening' | 'Speak to interrupt' | 'Processing'>('Listening');
     const [activeStream, setActiveStream] = useState<'user' | 'bot' | null>('user');
-    const [language, setLanguage] = useState<LanguageCode>('id-ID');
+
     const {
         transcript,
         finalTranscript,
@@ -140,7 +145,7 @@ export default function Playground() {
     }, [messageBuffer]);
 
     useEffect(() => {
-        loadImage('/soal/laws-of-sine.png').then((image) => {
+        loadImage('/soal/identitas-trigonometri.png').then((image) => {
             setQuestionSheetImageSource(image);
             toast.info("Question sheet succesfully loaded!")
         }).catch((error) => {
@@ -241,6 +246,9 @@ export default function Playground() {
                 <Badge>{status}</Badge>
                 <div className="text-helper">
                     <span className="status mx-1">{activeStream === 'user' ? transcript : currentlyPlayingTTSText}</span>
+                </div>
+                <div className="fixed right-8 bottom-10">
+                    <DialogFinalAnswer canvasRef={canvasRef} />
                 </div>
             </div>
         </>

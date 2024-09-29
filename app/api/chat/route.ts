@@ -3,6 +3,7 @@ import { openai } from '@ai-sdk/openai';
 import { findRelevantContent } from '@/lib/embeddings';
 import { z } from 'zod';
 import { getLanguageDetailsById } from '@/lib/utils';
+import { insertChatLog } from './actions'
 
 export async function POST(req: Request) {
     const { messages, data } = await req.json();
@@ -95,6 +96,9 @@ export async function POST(req: Request) {
                     temperature: 72 + Math.floor(Math.random() * 21) - 10,
                 }),
             }),
+        },
+        onFinish({ text, toolCalls, toolResults, finishReason, usage }) {
+            insertChatLog(messages, data.imageUrl, text, finishReason, usage)
         },
     });
 
