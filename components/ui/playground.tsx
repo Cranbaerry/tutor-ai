@@ -1,5 +1,5 @@
 'use client';
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import 'regenerator-runtime/runtime';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import {
@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { findRelevantContent } from '@/lib/embeddings';
 import { Button } from "@/components/ui/button";
 import { LanguageCode } from "@/lib/definitions";
+import { useTabActive } from "@/hooks/use-tab-active";
 
 const Canvas = dynamic(() => import('@/components/ui/canvas'), {
     ssr: false,
@@ -52,7 +53,7 @@ export default function Playground() {
         clearTTSQueue: () => void;
         startExternalAudioVisualization: (stream: MediaStream) => void;
     }>();
-    
+
     const [questionSheetImageSource, setQuestionSheetImageSource] = useState<HTMLImageElement | null>(null);
     const [pauseTimer, setPauseTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
     const [status, setStatus] = useState<'Listening' | 'Speak to interrupt' | 'Processing'>('Listening');
@@ -87,10 +88,10 @@ export default function Playground() {
             };
 
             const options: ChatRequestOptions = {
-                data: { 
+                data: {
                     imageUrl: canvasDataUrl as JSONValue,
                     language: language as JSONValue
-                 },
+                },
             };
 
             console.log('Sending transcript:', finalTranscript);
@@ -139,25 +140,12 @@ export default function Playground() {
     }, [messageBuffer]);
 
     useEffect(() => {
-        SpeechRecognition.startListening({
-            continuous: true,
-            interimResults: true,
-            language: language
-        });
-
         loadImage('/soal/laws-of-sine.png').then((image) => {
             setQuestionSheetImageSource(image);
             toast.info("Question sheet succesfully loaded!")
         }).catch((error) => {
             toast.error("Failed to load sheet, please refresh and try again..")
         });;
-        
-        return () => {
-            SpeechRecognition.stopListening();
-            if (pauseTimer) {
-                clearTimeout(pauseTimer);
-            }
-        };
     }, []);
 
     useEffect(() => {
@@ -198,6 +186,21 @@ export default function Playground() {
         setCurrentlyPlayingTTSText(text.trim());
     };
 
+    const isTabActive = useTabActive();
+    if (isTabActive) {
+        SpeechRecognition.startListening({
+            continuous: true,
+            interimResults: true,
+            language: language
+        });
+    } else {
+        if (listening) {
+            SpeechRecognition.stopListening();
+            if (pauseTimer) {
+                clearTimeout(pauseTimer);
+            }
+        }
+    }
     return (
         <>
             {!browserSupportsSpeechRecognition &&
