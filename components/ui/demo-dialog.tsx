@@ -24,10 +24,10 @@ function DialogDemo() {
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-            <iframe 
+              <iframe 
                 width="560" 
                 height="315" 
-                src="https://www.youtube.com/embed/8h46g02bEUk?si=zPEbRYgyUNTDfHXV" 
+                src="https://www.youtube.com/embed/cSnRY-zG_Pg?si=P7WitPD4Nagna421" 
                 title="YouTube video player" 
                 frameBorder="0" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
