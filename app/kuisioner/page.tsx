@@ -25,8 +25,8 @@ import { getUserData } from "@/lib/utils.server"
 import { Header } from "@/components/ui/header"
 
 const formSchema = z.object({
-    fullname: z.string().min(2, {
-        message: "Nama lengkap harus setidaknya 2 karakter.",
+    fullname: z.string({
+        required_error: "Nama lengkap wajib diisi",
     }),
     whatsappNumber: z.string(),
     email: z.string(),
@@ -117,7 +117,7 @@ export default function Kuisioner() {
     })
 
     function onSubmit(values: z.infer<typeof formSchema>) {
-        insert(values)
+        insert({...values, fullname: fullname})
         toast.success('Success', { description: 'Data berhasil disimpan!' })
         router.push("/pre-test")
     }
@@ -214,7 +214,7 @@ export default function Kuisioner() {
                                         <FormItem>
                                             <FormLabel>Nama Lengkap</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="John Doe" {...field} value={fullname!} onChange={e => setFullname(e.target.value)} />
+                                                <Input placeholder="John Doe" {...field} value={fullname!} onChange={e => setFullname(e.target.value)} required />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
