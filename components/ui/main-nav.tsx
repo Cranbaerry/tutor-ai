@@ -8,6 +8,7 @@ import { ExitIcon } from "@radix-ui/react-icons";
 import { LanguageCode } from "@/lib/definitions";
 import { logout } from "@/app/logout/actions";
 import { DialogDemo } from "./demo-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./alert-dialog";
 
 interface IMainNavProps extends React.HTMLAttributes<HTMLElement>{
   enableChangeLanguage?: boolean;
@@ -23,6 +24,7 @@ export function MainNav({
   ...props
 }: IMainNavProps) {
   const [isLanguageEN, setIsLanguageEN] = useState(false)
+  const [isAlertChangeLangOpen, setIsAlertChangeLangOpen] = useState(false)
 
   useEffect(() => {
     if(isLanguageEN){
@@ -33,10 +35,9 @@ export function MainNav({
   }, [isLanguageEN])
 
   const onChangeLanguageToggle = () => {
-    setIsLanguageEN(!isLanguageEN) 
+    setIsLanguageEN(!isLanguageEN)
+    setIsAlertChangeLangOpen(true)
   }
-
-  
 
   return (
     <nav
@@ -67,6 +68,22 @@ export function MainNav({
           Keluar
         </button>
       </form>
+
+      <AlertDialog open={isAlertChangeLangOpen} onOpenChange={setIsAlertChangeLangOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Bahasa komunikasi berhasil diubah!</AlertDialogTitle>
+              <AlertDialogDescription>
+                Sekarang, kamu bisa berinteraksi dengan BEEXPERT menggunakan bahasa {isLanguageEN ? 'Inggris': 'Indonesia'}.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction onClick={() => setIsAlertChangeLangOpen(false)}>
+                Mengerti
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+      </AlertDialog>
     </nav>
   )
 }

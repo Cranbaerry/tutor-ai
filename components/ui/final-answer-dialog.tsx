@@ -137,7 +137,7 @@ function DialogFinalAnswer({canvasRef}: IDialogFinalAnswerProps) {
                             />
                         </div>
                         <DialogFooter>
-                            <Button type="submit" disabled={loading}>Save changes</Button>
+                            <Button type="submit" disabled={loading}>Submit</Button>
                         </DialogFooter>
                     </form>
                 </Form>
