@@ -14,7 +14,7 @@ import { toast } from "sonner";
 
 export default function AuthenticationPage() {
   const router = useRouter();
-  const [formMode, setFormMode] = useState<'SignUp' | 'SignIn'>('SignUp');
+  const [formMode, setFormMode] = useState<'SignUp' | 'SignIn'>('SignIn');
   const toggleFormMode = () => {
     setFormMode((prevMode) => (prevMode === 'SignUp' ? 'SignIn' : 'SignUp'));
   };
