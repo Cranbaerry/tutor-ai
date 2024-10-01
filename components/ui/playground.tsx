@@ -153,9 +153,9 @@ export default function Playground({ language }: IPlaygroundProps) {
     useEffect(() => {
         loadImage('/soal/identitas-trigonometri.png').then((image) => {
             setQuestionSheetImageSource(image);
-            toast.info("Question sheet succesfully loaded!")
+            //toast.info("Question sheet succesfully loaded!")
         }).catch((error) => {
-            toast.error("Failed to load sheet, please refresh and try again..")
+            toast.error("Failed to load question sheet, please refresh and try again..")
         });;
 
         handleEmbeddingModelLoad();
@@ -165,7 +165,7 @@ export default function Playground({ language }: IPlaygroundProps) {
         setIsEmbeddingModelActive(false); // Initially set to false
         const callApiUntilOk = async () => {
             try {
-                const response = await fetch('/api/test');
+                const response = await fetch('/api/check-embedding');
 
                 if (response.ok) {
                     setIsEmbeddingModelActive(true);
@@ -223,89 +223,93 @@ export default function Playground({ language }: IPlaygroundProps) {
 
     useEffect(() => {
         if (isTabActive && !isMuted) {
-          SpeechRecognition.startListening({
-            continuous: true,
-            interimResults: true,
-            language: language
-          })
-        } else {
-          if (listening) {
-            SpeechRecognition.stopListening()
-          }
-        }
-      }, [isTabActive, isMuted, language, listening])
-
-    const toggleMicrophone = useCallback(() => {
-        if (isMuted) {
-          navigator.mediaDevices.getUserMedia({ audio: true })
-            .then((mediaStream) => {
-              setStream(mediaStream)
-              setIsMuted(false)
-              SpeechRecognition.startListening({
+            SpeechRecognition.startListening({
                 continuous: true,
                 interimResults: true,
                 language: language
-              })
-              toast.success("Microphone unmuted")
-            })
-            .catch((error) => {
-              console.error('Error accessing microphone:', error)
-              toast.error("Failed to access microphone. Please check your permissions.")
             })
         } else {
-          if (stream) {
-            stream.getTracks().forEach(track => track.stop())
-            setStream(null)
-          }
-          SpeechRecognition.stopListening()
-          setIsMuted(true)
-          toast.success("Microphone muted")
+            if (listening) {
+                SpeechRecognition.stopListening()
+            }
         }
-      }, [isMuted, stream, language])
+    }, [isTabActive, isMuted, language, listening])
 
-      useEffect(() => {
-        return () => {
-          if (stream) {
-            stream.getTracks().forEach(track => track.stop())
-          }
+    const toggleMicrophone = useCallback(() => {
+        if (isMuted) {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then((mediaStream) => {
+                    setStream(mediaStream)
+                    setIsMuted(false)
+                    SpeechRecognition.startListening({
+                        continuous: true,
+                        interimResults: true,
+                        language: language
+                    })
+                    toast.info("Microphone is now unmuted.");
+                })
+                .catch((error) => {
+                    console.error('Error accessing microphone:', error)
+                    toast.error("Failed to access microphone. Please check your permissions.")
+                })
+        } else {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop())
+                setStream(null)
+            }
+            SpeechRecognition.stopListening()
+            setIsMuted(true)
+            toast.info("Microphone is now muted.");
         }
-      }, [stream])
-    
+    }, [isMuted, stream, language])
+
+    useEffect(() => {
+        return () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop())
+            }
+        }
+    }, [stream])
+
     return (
         <>
-            <AlertDialog open={!browserSupportsSpeechRecognition}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Browser not supported</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Your browser doesn&apos;t support speech recognition. For a smooth experience, please try using the latest version of Google Chrome or Microsoft Edge.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogAction>Got it!</AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            {!browserSupportsSpeechRecognition &&
+                <AlertDialog defaultOpen={true}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Browser not supported</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Your browser doesn&apos;t support speech recognition. For a smooth experience, please try using the latest version of Google Chrome or Microsoft Edge.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogAction>Got it!</AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            }
 
-            <AlertDialog open={!isMicrophoneAvailable}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Microphone not recognized</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Please allow this web page to use your microphone before transcription can begin.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogAction>Got it!</AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            {!isMicrophoneAvailable &&
+                <AlertDialog defaultOpen={true}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Microphone not recognized</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Please allow this web page to use your microphone before transcription can begin.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogAction>Got it!</AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            }
 
             <AlertDialog open={!isEmbeddingModelActive}>
                 <AlertDialogContent className="max-w-md">
                     <AlertDialogHeader>
                         <AlertDialogDescription className="flex flex-col items-center space-y-4">
-                        <Icons.spinner className="h-14 w-14 animate-spin" />
+                            <Icons.spinner className="h-14 w-14 animate-spin" />
                             <p>Please wait while we load embedding model...</p>
                         </AlertDialogDescription>
                     </AlertDialogHeader>
@@ -317,17 +321,17 @@ export default function Playground({ language }: IPlaygroundProps) {
                 <TooltipProvider>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                        <Button
-                            onClick={toggleMicrophone}
-                            aria-label={isMuted ? 'Mute microphone' : 'Unmute microphone'}
-                            variant="outline"
-                            className="tool__mute p-2"
-                        >
-                            {isMuted ? <MicOff className="h-5 w-5 text-black" /> : <Mic className="h-5 w-5 text-black" />}
-                        </Button>
+                            <Button
+                                onClick={toggleMicrophone}
+                                aria-label={isMuted ? 'Mute microphone' : 'Unmute microphone'}
+                                variant="outline"
+                                className="tool__mute p-2"
+                            >
+                                {isMuted ? <MicOff className="h-5 w-5 text-black" /> : <Mic className="h-5 w-5 text-black" />}
+                            </Button>
                         </TooltipTrigger>
                         <TooltipContent>
-                        <p>{isMuted ? 'Unmute microphone' : 'Mute microphone'}</p>
+                            <p>{isMuted ? 'Unmute microphone' : 'Mute microphone'}</p>
                         </TooltipContent>
                     </Tooltip>
                 </TooltipProvider>
