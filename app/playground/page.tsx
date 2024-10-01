@@ -210,7 +210,7 @@ export default function Main() {
             <Header isFixed={false} enableChangeLanguage language={language} onChangeLanguage={onChangeLanguage} />
             <Separator />
             <div className="h-full py-6 px-4">
-                <div className="flex h-full flex-col space-y-4">
+                <div className="flex h-full flex-col">
                     <Playground language={language} />
                 </div>
             </div>
