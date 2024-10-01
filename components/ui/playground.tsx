@@ -322,7 +322,7 @@ export default function Playground({ language }: IPlaygroundProps) {
                             variant="outline"
                             className="tool__mute p-2"
                         >
-                            {isMuted ? <Mic className="h-5 w-5 text-[rgb(195,0,0)]" /> : <MicOff className="h-5 w-5 text-black" />}
+                            {isMuted ? <MicOff className="h-5 w-5 text-black" /> : <Mic className="h-5 w-5 text-black" />}
                         </Button>
                         </TooltipTrigger>
                         <TooltipContent>
