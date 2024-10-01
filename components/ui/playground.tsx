@@ -21,6 +21,9 @@ import { LanguageCode } from "@/lib/definitions";
 import { useTabActive } from "@/hooks/use-tab-active";
 import { DialogFinalAnswer } from "./final-answer-dialog";
 import { Icons } from "@/components/ui/icons";
+import { Button } from "./button";
+import { Mic, MicOff } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";
 
 const Canvas = dynamic(() => import('@/components/ui/canvas'), {
     ssr: false,
@@ -63,6 +66,9 @@ export default function Playground({ language }: IPlaygroundProps) {
     const [status, setStatus] = useState<'Listening' | 'Speak to interrupt' | 'Processing'>('Listening');
     const [activeStream, setActiveStream] = useState<'user' | 'bot' | null>('user');
     const [isEmbeddingModelActive, setIsEmbeddingModelActive] = useState<boolean>(false);
+    const [isMuted, setIsMuted] = useState<boolean>(false)
+    const [stream, setStream] = useState<MediaStream | null>(null)
+
     const {
         transcript,
         finalTranscript,
@@ -213,20 +219,57 @@ export default function Playground({ language }: IPlaygroundProps) {
     };
 
     const isTabActive = useTabActive();
-    if (isTabActive) {
-        SpeechRecognition.startListening({
+
+    useEffect(() => {
+        if (isTabActive && !isMuted) {
+          SpeechRecognition.startListening({
             continuous: true,
             interimResults: true,
             language: language
-        });
-    } else {
-        if (listening) {
-            SpeechRecognition.stopListening();
-            if (pauseTimer) {
-                clearTimeout(pauseTimer);
-            }
+          })
+        } else {
+          if (listening) {
+            SpeechRecognition.stopListening()
+          }
         }
-    }
+      }, [isTabActive, isMuted, language, listening])
+
+    const toggleMicrophone = useCallback(() => {
+        if (isMuted) {
+          navigator.mediaDevices.getUserMedia({ audio: true })
+            .then((mediaStream) => {
+              setStream(mediaStream)
+              setIsMuted(false)
+              SpeechRecognition.startListening({
+                continuous: true,
+                interimResults: true,
+                language: language
+              })
+              toast.success("Microphone unmuted")
+            })
+            .catch((error) => {
+              console.error('Error accessing microphone:', error)
+              toast.error("Failed to access microphone. Please check your permissions.")
+            })
+        } else {
+          if (stream) {
+            stream.getTracks().forEach(track => track.stop())
+            setStream(null)
+          }
+          SpeechRecognition.stopListening()
+          setIsMuted(true)
+          toast.success("Microphone muted")
+        }
+      }, [isMuted, stream, language])
+
+      useEffect(() => {
+        return () => {
+          if (stream) {
+            stream.getTracks().forEach(track => track.stop())
+          }
+        }
+      }, [stream])
+    
     return (
         <>
             <AlertDialog open={!browserSupportsSpeechRecognition}>
@@ -270,6 +313,23 @@ export default function Playground({ language }: IPlaygroundProps) {
 
             <Canvas backgroundColor={'#FFFFFF'} canvasRef={canvasRef} questionsSheetImageSource={questionSheetImageSource} />
             <div className="fixed flex bottom-8 left-24 items-center space-x-2">
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                        <Button
+                            onClick={toggleMicrophone}
+                            aria-label={isMuted ? 'Mute microphone' : 'Unmute microphone'}
+                            variant="outline"
+                            className="p-2"
+                        >
+                            {isMuted ? <Mic className="h-5 w-5 text-[rgb(195,0,0)]" /> : <MicOff className="h-5 w-5 text-black" />}
+                        </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                        <p>{isMuted ? 'Unmute microphone' : 'Mute microphone'}</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
                 <TTS ref={ttsRef} width={50} height={40} onPlayingStatusChange={handleTTSPlayingStatusChange} onReadingTextChange={handleTTSOnReadingTextChange} />
                 <Badge>{status}</Badge>
                 <div className="text-helper">
