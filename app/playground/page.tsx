@@ -148,6 +148,17 @@ export default function Main() {
             title: <h2 className='font-bold'>Tool: Zoom Out</h2>,
           },
           {
+            content: <span className='text-sm'>Klik toggle berikut untuk mute/unmute mikrofon kamu.</span>,
+            placement: 'right',
+            styles: {
+              options: {
+                width: 300
+              },
+            },
+            target: '.tool__mute',
+            title: <h2 className='font-bold'>Tool: Mute/Unmute Microphone</h2>,
+          },
+          {
             content: <span className='text-sm'>Kamu bisa mulai berinteraksi dengan menyapa BEEXPERT terlebih dahulu.</span>,
             locale: { skip: <strong aria-label="skip">Skip</strong>, last: <strong aria-label="skip">Done</strong> },
             placement: 'center',

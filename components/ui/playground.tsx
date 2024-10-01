@@ -320,7 +320,7 @@ export default function Playground({ language }: IPlaygroundProps) {
                             onClick={toggleMicrophone}
                             aria-label={isMuted ? 'Mute microphone' : 'Unmute microphone'}
                             variant="outline"
-                            className="p-2"
+                            className="tool__mute p-2"
                         >
                             {isMuted ? <Mic className="h-5 w-5 text-[rgb(195,0,0)]" /> : <MicOff className="h-5 w-5 text-black" />}
                         </Button>
