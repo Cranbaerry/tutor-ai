@@ -21,6 +21,7 @@ import { LanguageCode } from "@/lib/definitions";
 import { useTabActive } from "@/hooks/use-tab-active";
 import { DialogFinalAnswer } from "./final-answer-dialog";
 import { Icons } from "@/components/ui/icons";
+import ChatDrawers from '@/components/ui/chat-drawers';
 
 const Canvas = dynamic(() => import('@/components/ui/canvas'), {
     ssr: false,
@@ -275,7 +276,8 @@ export default function Playground({ language }: IPlaygroundProps) {
                 <div className="text-helper">
                     <span className="status mx-1">{activeStream === 'user' ? transcript : currentlyPlayingTTSText}</span>
                 </div>
-                <div className="fixed right-8 bottom-10">
+                <div className="fixed right-8 bottom-10 flex gap-2">
+                    <ChatDrawers messages={messages} />
                     <DialogFinalAnswer canvasRef={canvasRef} />
                 </div>
             </div>
