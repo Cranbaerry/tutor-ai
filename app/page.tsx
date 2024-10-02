@@ -6,7 +6,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { UserAuthForm } from "@/components/ui/use-auth-form";
-import { getUserData } from "@/lib/utils.server";
+import { getUserData } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 

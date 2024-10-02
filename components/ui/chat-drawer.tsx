@@ -15,7 +15,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { CounterClockwiseClockIcon } from '@radix-ui/react-icons'
 import { Message } from 'ai/react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-
+import { createClient } from '@/lib/supabase/client'
+import { getUserData } from '@/lib/utils'
+import { User } from '@supabase/supabase-js'
 interface ChatDrawerProps {
     chatLog: Message[]
 }
@@ -24,6 +26,8 @@ export default function ChatDrawer({ chatLog }: ChatDrawerProps) {
     const [open, setOpen] = useState(false)
     const [showTooltip, setShowTooltip] = useState(false)
     const scrollAreaRef = useRef<HTMLDivElement>(null)
+    const supabase = createClient()
+    const [userName, setUserName] = useState<string | null>(null);
 
     const handleOpenChange = (newOpen: boolean) => {
         setOpen(newOpen)
@@ -38,13 +42,24 @@ export default function ChatDrawer({ chatLog }: ChatDrawerProps) {
         }
     }
 
+    const fetchUserData = async () => {
+        const userData = await getUserData(supabase)
+        if (userData) {
+            const userName = await supabase.from('profiles').select('fullname').eq('user_id', userData.id).single();
+            if (userName) setUserName(userName.data?.fullname ?? 'User');
+        }
+    }
+
     useEffect(() => {
-        console.log('open', open)
         if (open) {
             // Use setTimeout to ensure the drawer content has rendered
             setTimeout(scrollToBottom, 100)
         }
     }, [open])
+
+    useEffect(() => {
+        fetchUserData()
+    }, [])
 
     return (
         <Sheet open={open} onOpenChange={handleOpenChange}>
@@ -89,7 +104,7 @@ export default function ChatDrawer({ chatLog }: ChatDrawerProps) {
                                 <div className="flex flex-col">
                                     <div className="flex items-center space-x-2">
                                         <span className="font-semibold capitalize">
-                                            {message.role === 'assistant' ? 'Bee' : message.role}
+                                            {message.role === 'assistant' ? 'Bee' : userName}
                                         </span>
                                         <span className="text-sm text-muted-foreground">
                                             {new Date(message.createdAt ?? '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

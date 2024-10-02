@@ -21,7 +21,7 @@ import { insert, isQuestionareFinished } from './actions'
 import { useEffect, useState } from 'react';
 import { toast } from "sonner"
 import type { InferGetServerSidePropsType, GetServerSideProps } from 'next'
-import { getUserData } from "@/lib/utils.server"
+import { getUserData } from "@/lib/utils"
 import { Header } from "@/components/ui/header"
 
 const formSchema = z.object({
