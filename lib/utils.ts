@@ -11,13 +11,14 @@ export function cn(...inputs: ClassValue[]) {
 
 // Note: Specify client if you want to use this function in the server
 export async function getUserData(supabase: SupabaseClient = createClient()) {
-  const { data: { user } } = await supabase.auth.getUser();
-
+  // const { data: { user } } = await supabase.auth.getuser();
+  const { data: { session } } = await supabase.auth.getSession();
+  
   // return user ? experimental_taintObjectReference(
   //     `Do not pass the whole user object to the client`,
   //     user
   // ) : null;
-  return user;
+  return session?.user;
 }
 
 export function getLanguageDetailsById(id: string): LanguageDetails | undefined {
