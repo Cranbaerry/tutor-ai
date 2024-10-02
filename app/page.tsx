@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/legacy/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -10,7 +10,7 @@ import { getUserData } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
-function AuthPageContent() {
+export default function AuthPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [formMode, setFormMode] = useState<'SignUp' | 'SignIn'>('SignIn');
@@ -105,13 +105,5 @@ function AuthPageContent() {
         </div>
       </div>
     </>
-  );
-}
-
-export default function AuthenticationPage() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <AuthPageContent />
-    </Suspense>
   );
 }
