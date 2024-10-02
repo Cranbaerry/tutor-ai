@@ -5,12 +5,15 @@ export async function POST(req: Request) {
     const { text, language } = await req.json();
     const tts = new MsEdgeTTS();
 
+    // Replace "cos" with "kos" to avoid Azure TTS mispronouncing it as "cos" in Bahasa Indonesia
+    const processedText = text.replace(/\bcos\b/gi, 'kos');
+
     // VOICE LIST: https://gist.github.com/BettyJJ/17cbaa1de96235a7f5773b8690a20462
     const langDetails = getLanguageDetailsById(language);
     const voiceName = langDetails?.azureSpeechVoiceName ?? 'id-ID-ArdiNeural';
     await tts.setMetadata(voiceName, OUTPUT_FORMAT.WEBM_24KHZ_16BIT_MONO_OPUS);
 
-    const readable = tts.toStream(text);
+    const readable = tts.toStream(processedText);
     const stream = new ReadableStream({
         async start(controller) {
             readable.on('data', (chunk) => {
