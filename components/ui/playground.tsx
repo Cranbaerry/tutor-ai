@@ -158,15 +158,12 @@ export default function Playground({ language }: IPlaygroundProps) {
     useEffect(() => {
         loadImage('/soal/identitas-trigonometri.png').then((image) => {
             setQuestionSheetImageSource(image);
-            //toast.info("Question sheet succesfully loaded!")
         }).catch((error) => {
             toast.error("Failed to load question sheet, please refresh and try again..")
         });;
 
         handleEmbeddingModelLoad();
         handleMessagesLoad();
-
-        // Load messages from supabase based on userId
     }, []);
 
     const handleEmbeddingModelLoad = async () => {
@@ -205,7 +202,7 @@ export default function Playground({ language }: IPlaygroundProps) {
             console.error('Error fetching messages:', error);
             return;
         }
-   
+
         const messages: Message[] = dbMessages.map((dbMessage: any) => {
             return {
                 id: dbMessage.id,
@@ -214,7 +211,7 @@ export default function Playground({ language }: IPlaygroundProps) {
                 createdAt: dbMessage.created_at,
             };
         });
-        
+
         setMessages(messages);
         setIsMessagesLoaded(true);
     }
@@ -355,33 +352,41 @@ export default function Playground({ language }: IPlaygroundProps) {
             </AlertDialog>
 
             <Canvas backgroundColor={'#FFFFFF'} canvasRef={canvasRef} questionsSheetImageSource={questionSheetImageSource} />
-            <div className="fixed flex bottom-8 left-24 items-center space-x-2">
-                <TTS ref={ttsRef} width={50} height={40} onPlayingStatusChange={handleTTSPlayingStatusChange} onReadingTextChange={handleTTSOnReadingTextChange} />
-                <Badge>{status}</Badge>
-                <div className="text-helper">
-                    <span className="status mx-1">{activeStream === 'user' ? transcript : currentlyPlayingTTSText}</span>
+            <div className="fixed bottom-8 left-24 w-3/4 flex items-end space-x-2">
+                <div className="flex items-center">
+                    <TTS ref={ttsRef} width={50} height={40} onPlayingStatusChange={handleTTSPlayingStatusChange} onReadingTextChange={handleTTSOnReadingTextChange} />
+                    <Badge className="mr-2">{status}</Badge>
                 </div>
-                <div className="fixed right-8 bottom-10 flex gap-2">
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button
-                                    onClick={toggleMicrophone}
-                                    aria-label={isMuted ? 'Mute microphone' : 'Unmute microphone'}
-                                    variant="outline"
-                                    className="tool__mute p-3"
-                                >
-                                    {isMuted ? <MicOff className="h-5 w-5 text-black" /> : <Mic className="h-5 w-5 text-black" />}
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>{isMuted ? 'Unmute microphone' : 'Mute microphone'}</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
-                    <ChatDrawer chatLog={messages} />
-                    <DialogFinalAnswer canvasRef={canvasRef} />
+
+                <div className="flex-1">
+                    <div className="text-helper whitespace-normal">
+                        <span className="status mx-1 whitespace-normal break-all">
+                            {activeStream === 'user' ? transcript : currentlyPlayingTTSText}
+                        </span>
+                    </div>
                 </div>
+            </div>
+
+            <div className="fixed right-8 bottom-10 flex gap-2">
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                onClick={toggleMicrophone}
+                                aria-label={isMuted ? 'Mute microphone' : 'Unmute microphone'}
+                                variant="outline"
+                                className="tool__mute p-3"
+                            >
+                                {isMuted ? <MicOff className="h-5 w-5 text-black" /> : <Mic className="h-5 w-5 text-black" />}
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>{isMuted ? 'Unmute microphone' : 'Mute microphone'}</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+                <ChatDrawer chatLog={messages} />
+                <DialogFinalAnswer canvasRef={canvasRef} />
             </div>
         </>
     );
