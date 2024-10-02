@@ -70,7 +70,7 @@ export default function Playground({ language }: IPlaygroundProps) {
     const [status, setStatus] = useState<'Listening' | 'Speak to interrupt' | 'Processing'>('Listening');
     const [activeStream, setActiveStream] = useState<'user' | 'bot' | null>('user');
     const [isEmbeddingModelActive, setIsEmbeddingModelActive] = useState<boolean>(false);
-    const [isMuted, setIsMuted] = useState<boolean>(true);
+    const [isMuted, setIsMuted] = useState<boolean>(false);
     const [stream, setStream] = useState<MediaStream | null>(null);
     const [isMessagesLoaded, setIsMessagesLoaded] = useState<boolean>(false);
     const supabase = createClient();
