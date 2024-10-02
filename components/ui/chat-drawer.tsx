@@ -69,7 +69,7 @@ export default function ChatDrawer({ chatLog }: ChatDrawerProps) {
                         <SheetTrigger asChild>
                             <Button
                                 variant="outline"
-                                className="p-3"
+                                className="chat__log p-3"
                                 aria-label="Open chat log"
                                 onMouseEnter={() => setShowTooltip(true)}
                                 onMouseLeave={() => setShowTooltip(false)}

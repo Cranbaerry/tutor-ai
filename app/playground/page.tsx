@@ -149,7 +149,7 @@ export default function Main() {
           },
           {
             content: <span className='text-sm'>Klik toggle berikut untuk mute/unmute mikrofon kamu.</span>,
-            placement: 'right',
+            placement: 'top',
             styles: {
               options: {
                 width: 300
@@ -157,6 +157,17 @@ export default function Main() {
             },
             target: '.tool__mute',
             title: <h2 className='font-bold'>Tool: Mute/Unmute Microphone</h2>,
+          },
+          {
+            content: <span className='text-sm'>Klik toggle berikut untuk melihat histori chat kamu dengan BEEXPERT.</span>,
+            placement: 'top',
+            styles: {
+              options: {
+                width: 300
+              },
+            },
+            target: '.chat__log',
+            title: <h2 className='font-bold'>Tool: Chat Log</h2>,
           },
           {
             content: <span className='text-sm'>Kamu bisa mulai berinteraksi dengan menyapa BEEXPERT terlebih dahulu.</span>,
