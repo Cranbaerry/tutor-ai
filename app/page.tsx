@@ -7,17 +7,19 @@ import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { UserAuthForm } from "@/components/ui/use-auth-form";
 import { getUserData } from "@/lib/utils";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
 export default function AuthenticationPage() {
   const router = useRouter();
+  const searchParams = useSearchParams()
   const [formMode, setFormMode] = useState<'SignUp' | 'SignIn'>('SignIn');
   const toggleFormMode = () => {
     setFormMode((prevMode) => (prevMode === 'SignUp' ? 'SignIn' : 'SignUp'));
   };
 
   useEffect(() => {
+    const isAuthCodeError = searchParams.get('auth-code-error') !== null
     async function checkUser() {
       const data = await getUserData();
       if (data) {
@@ -27,7 +29,11 @@ export default function AuthenticationPage() {
       }
     }
 
-    checkUser();
+    if (isAuthCodeError) {
+      toast.error("Error", { description: "Kode autentikasi tidak valid." });
+    } else {
+      checkUser();
+    }     
   }, []);
 
   return (
