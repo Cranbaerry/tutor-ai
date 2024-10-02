@@ -10,7 +10,7 @@ import { useState, useCallback, useEffect } from "react";
 import { signInWithPassword, signInWithOAuth, signUp } from "@/app/actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+import Image from "next/legacy/image";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {
   formMode: "SignUp" | "SignIn";

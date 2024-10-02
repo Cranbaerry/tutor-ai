@@ -1,4 +1,4 @@
-import Image from "next/image"
+import Image from "next/legacy/image"
 import { MainNav } from "@/components/ui/main-nav"
 import React from "react";
 import { LanguageCode } from "@/lib/definitions";

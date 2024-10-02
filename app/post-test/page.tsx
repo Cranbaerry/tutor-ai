@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
-import Image from "next/image"
+import Image from "next/legacy/image"
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/ui/header";
 import dynamic from "next/dynamic";
