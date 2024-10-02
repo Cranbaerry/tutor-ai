@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -10,10 +10,11 @@ import { getUserData } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
-export default function AuthenticationPage() {
+function AuthPageContent() {
   const router = useRouter();
-  const searchParams = useSearchParams()
+  const searchParams = useSearchParams();
   const [formMode, setFormMode] = useState<'SignUp' | 'SignIn'>('SignIn');
+
   const toggleFormMode = () => {
     setFormMode((prevMode) => (prevMode === 'SignUp' ? 'SignIn' : 'SignUp'));
   };
@@ -39,7 +40,7 @@ export default function AuthenticationPage() {
 
     checkAuthCodeError();
     checkUser();
-  }, []);
+  }, [router, searchParams]);
 
   return (
     <>
@@ -65,7 +66,6 @@ export default function AuthenticationPage() {
             <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-50"></div>
           </div>
           <div className="relative z-20 mt-auto">
-
             <blockquote className="space-y-2">
               <p className="text-base">
                 Platform bimbingan belajar berbasis AI yang dirancang untuk siswa SMA yang memungkinkan siswa untuk memasukkan pertanyaan melalui suara dan gambar secara langsung.
@@ -105,5 +105,13 @@ export default function AuthenticationPage() {
         </div>
       </div>
     </>
+  );
+}
+
+export default function AuthenticationPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AuthPageContent />
+    </Suspense>
   );
 }
