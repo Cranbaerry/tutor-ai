@@ -24,7 +24,10 @@ import { Icons } from "@/components/ui/icons";
 import { Button } from "./button";
 import { Mic, MicOff } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";
-import ChatDrawers from '@/components/ui/chat-drawers';
+import ChatDrawer from "@/components/ui/chat-drawer";
+import { getUserData } from "@/lib/utils";
+import { set } from "zod";
+import { createClient } from "@/lib/supabase/client";
 
 const Canvas = dynamic(() => import('@/components/ui/canvas'), {
     ssr: false,
@@ -36,7 +39,7 @@ interface IPlaygroundProps {
 
 export default function Playground({ language }: IPlaygroundProps) {
     const [toolCall, setToolCall] = useState<string>();
-    const { messages, input, handleInputChange, handleSubmit, append } = useChat({
+    const { messages, input, handleInputChange, handleSubmit, append, setMessages } = useChat({
         onToolCall({ toolCall }) {
             setToolCall(toolCall.toolName);
         },
@@ -67,8 +70,10 @@ export default function Playground({ language }: IPlaygroundProps) {
     const [status, setStatus] = useState<'Listening' | 'Speak to interrupt' | 'Processing'>('Listening');
     const [activeStream, setActiveStream] = useState<'user' | 'bot' | null>('user');
     const [isEmbeddingModelActive, setIsEmbeddingModelActive] = useState<boolean>(false);
-    const [isMuted, setIsMuted] = useState<boolean>(false)
-    const [stream, setStream] = useState<MediaStream | null>(null)
+    const [isMuted, setIsMuted] = useState<boolean>(true);
+    const [stream, setStream] = useState<MediaStream | null>(null);
+    const [isMessagesLoaded, setIsMessagesLoaded] = useState<boolean>(false);
+    const supabase = createClient();
 
     const {
         transcript,
@@ -123,7 +128,7 @@ export default function Playground({ language }: IPlaygroundProps) {
     }, [finalTranscript]);
 
     useEffect(() => {
-        if (messages.length > 0) {
+        if (messages.length > 0 && isMessagesLoaded) {
             const latestMessage = messages[messages.length - 1];
             const content = latestMessage.content;
             if (latestMessage?.role === 'assistant') {
@@ -159,10 +164,12 @@ export default function Playground({ language }: IPlaygroundProps) {
         });;
 
         handleEmbeddingModelLoad();
+        handleMessagesLoad();
+
+        // Load messages from supabase based on userId
     }, []);
 
     const handleEmbeddingModelLoad = async () => {
-        setIsEmbeddingModelActive(false); // Initially set to false
         const callApiUntilOk = async () => {
             try {
                 const response = await fetch('/api/check-embedding');
@@ -180,6 +187,37 @@ export default function Playground({ language }: IPlaygroundProps) {
 
         callApiUntilOk();
     };
+
+    const handleMessagesLoad = async () => {
+        const user = await getUserData(supabase);
+        if (!user) {
+            console.error('User is not logged in');
+            return;
+        }
+
+        const { data: dbMessages, error } = await supabase
+            .from('chat')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: true });
+
+        if (error) {
+            console.error('Error fetching messages:', error);
+            return;
+        }
+   
+        const messages: Message[] = dbMessages.map((dbMessage: any) => {
+            return {
+                id: dbMessage.id,
+                role: dbMessage.role,
+                content: dbMessage.content,
+                createdAt: dbMessage.created_at,
+            };
+        });
+        
+        setMessages(messages);
+        setIsMessagesLoaded(true);
+    }
 
     useEffect(() => {
         if (activeStream === 'user') {
@@ -318,30 +356,30 @@ export default function Playground({ language }: IPlaygroundProps) {
 
             <Canvas backgroundColor={'#FFFFFF'} canvasRef={canvasRef} questionsSheetImageSource={questionSheetImageSource} />
             <div className="fixed flex bottom-8 left-24 items-center space-x-2">
-                <TooltipProvider>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button
-                                onClick={toggleMicrophone}
-                                aria-label={isMuted ? 'Mute microphone' : 'Unmute microphone'}
-                                variant="outline"
-                                className="tool__mute p-2"
-                            >
-                                {isMuted ? <MicOff className="h-5 w-5 text-black" /> : <Mic className="h-5 w-5 text-black" />}
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p>{isMuted ? 'Unmute microphone' : 'Mute microphone'}</p>
-                        </TooltipContent>
-                    </Tooltip>
-                </TooltipProvider>
                 <TTS ref={ttsRef} width={50} height={40} onPlayingStatusChange={handleTTSPlayingStatusChange} onReadingTextChange={handleTTSOnReadingTextChange} />
                 <Badge>{status}</Badge>
                 <div className="text-helper">
                     <span className="status mx-1">{activeStream === 'user' ? transcript : currentlyPlayingTTSText}</span>
                 </div>
                 <div className="fixed right-8 bottom-10 flex gap-2">
-                    <ChatDrawers messages={messages} />
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    onClick={toggleMicrophone}
+                                    aria-label={isMuted ? 'Mute microphone' : 'Unmute microphone'}
+                                    variant="outline"
+                                    className="tool__mute p-3"
+                                >
+                                    {isMuted ? <MicOff className="h-5 w-5 text-black" /> : <Mic className="h-5 w-5 text-black" />}
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>{isMuted ? 'Unmute microphone' : 'Mute microphone'}</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                    <ChatDrawer chatLog={messages} />
                     <DialogFinalAnswer canvasRef={canvasRef} />
                 </div>
             </div>

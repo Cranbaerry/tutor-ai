@@ -2,13 +2,15 @@ import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { createClient } from "./supabase/client";
 import { languages, LanguageDetails } from "./definitions";
+import { File } from '@web-std/file';
+import { SupabaseClient } from "@supabase/supabase-js";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export async function getUserData() {
-  const supabase = createClient();
+// Note: Specify client if you want to use this function in the server
+export async function getUserData(supabase: SupabaseClient = createClient()) {
   const { data: { user } } = await supabase.auth.getUser();
 
   // return user ? experimental_taintObjectReference(

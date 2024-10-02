@@ -3,12 +3,61 @@ import { openai } from '@ai-sdk/openai';
 import { findRelevantContent } from '@/lib/embeddings';
 import { z } from 'zod';
 import { getLanguageDetailsById } from '@/lib/utils';
-import { insertChatLog } from './actions'
+import { createClient } from '@/lib/supabase/server'
+import { Message } from 'ai';
+import { convertCanvasUriToFile, getUserData } from "@/lib/utils"
+import { uploadImage } from "@/lib/supabase/storage"
+
+async function saveChat(currentMessage: Message, responseText: string, imageUri: string) {
+    const supabase = createClient();
+    const user = await getUserData(supabase);
+
+    if (!user) {
+        console.error('User is not logged in');
+        return;
+    }
+
+    const canvasFile = convertCanvasUriToFile(imageUri, user.id);
+    const { imageUrl, error } = await uploadImage({
+        storage: supabase.storage,
+        file: canvasFile,
+        bucket: "chat",
+        folder: user.id,
+    });
+
+    if (error) {
+        console.error('Error uploading image:', error);
+        return;
+    }
+
+    const { error: userChatError } = await supabase
+        .from('chat')
+        .insert([{
+            role: currentMessage.role,
+            content: currentMessage.content,
+            image_url: imageUrl
+        }]);
+
+    if (userChatError) {
+        console.error('Error saving user message:', userChatError);
+        return;
+    }
+
+    const { error: responseChatError } = await supabase
+        .from('chat')
+        .insert([{
+            role: 'assistant',
+            content: responseText,
+            image_url: imageUrl
+        }]);
+
+    console.error('Error saving assistant message:', responseChatError);
+}
 
 export async function POST(req: Request) {
     const { messages, data } = await req.json();
-    const initialMessages = messages.slice(0, -1);
-    const currentMessage = messages[messages.length - 1];
+    const initialMessages: Message[] = messages.slice(0, -1);
+    const currentMessage: Message = messages[messages.length - 1];
     const langDetails = getLanguageDetailsById(data.language);
     const language = langDetails?.name ?? 'Indonesian';
     const model = process.env.OPENAI_GPT_MODEL ?? 'gpt-4o-mini';
@@ -110,8 +159,8 @@ export async function POST(req: Request) {
                 }),
             }),
         },
-        onFinish({ text, toolCalls, toolResults, finishReason, usage }) {
-            insertChatLog(messages, data.imageUrl, text, finishReason, usage)
+        onFinish({ text }) {
+            saveChat(currentMessage, text, data.imageUrl);
         },
     });
 

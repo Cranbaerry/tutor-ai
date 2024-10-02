@@ -21,7 +21,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { insert } from "@/app/playground/actions"
 import { useState } from "react"
 import { convertCanvasUriToFile, getUserData } from "@/lib/utils"
-import { uploadImage } from "@/lib/supabase/storage/client"
+import { uploadImage } from "@/lib/supabase/storage"
+import { createClient } from "@/lib/supabase/client"
 
 const formSchema = z.object({
     question1: z.string({
@@ -65,7 +66,9 @@ function DialogFinalAnswer({canvasRef}: IDialogFinalAnswerProps) {
         const canvasDataUrl = canvasRef.current?.handleExport();
         
         const canvasFile = convertCanvasUriToFile(canvasDataUrl, user?.id)
+        const { storage } = createClient();
         const { imageUrl, error } = await uploadImage({
+            storage: storage,
             file: canvasFile,
             bucket: "final-answer",
         });

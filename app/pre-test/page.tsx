@@ -9,7 +9,8 @@ import dynamic from "next/dynamic"
 import { insert } from "./actions"
 import { toast } from "sonner"
 import { convertCanvasUriToFile, getUserData } from "@/lib/utils"
-import { uploadImage } from "@/lib/supabase/storage/client"
+import { uploadImage } from "@/lib/supabase/storage"
+import { createClient } from "@/lib/supabase/client"
 
 const Canvas = dynamic(() => import('@/components/ui/canvas'), {
   ssr: false,
@@ -49,9 +50,12 @@ export default function PreTest() {
 
     const user = await getUserData()
     const canvasDataUrl = canvasRef.current?.handleExport();
+    console.log('canvasDataUrl', canvasDataUrl);
     
-    const canvasFile = convertCanvasUriToFile(canvasDataUrl, user?.id)
+    const canvasFile = convertCanvasUriToFile(canvasDataUrl, user?.id);
+    const { storage } = createClient();
     const { imageUrl, error } = await uploadImage({
+      storage: storage,
       file: canvasFile,
       bucket: "pre-test",
     });
