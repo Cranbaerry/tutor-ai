@@ -19,7 +19,6 @@ export default function AuthenticationPage() {
   };
 
   useEffect(() => {
-    const isAuthCodeError = searchParams.get('auth-code-error') !== null
     async function checkUser() {
       const data = await getUserData();
       if (data) {
@@ -29,11 +28,17 @@ export default function AuthenticationPage() {
       }
     }
 
-    if (isAuthCodeError) {
-      toast.error("Error", { description: "Kode autentikasi tidak valid." });
-    } else {
-      checkUser();
-    }     
+    async function checkAuthCodeError() {
+      const isAuthCodeError = searchParams.get('auth-code-error') !== null;
+      await new Promise(resolve => setTimeout(resolve, 100)); // wait for toast to be ready
+      if (isAuthCodeError) {
+        console.log('error????');
+        toast.error("Error", { description: "Kode autentikasi tidak valid." });
+      }
+    }
+
+    checkAuthCodeError();
+    checkUser();
   }, []);
 
   return (
@@ -49,14 +54,14 @@ export default function AuthenticationPage() {
         >
           {formMode === 'SignUp' ? 'Masuk' : 'Daftar'}
         </Link>
-        <div className="relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex">  
+        <div className="relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex">
           <div className="absolute inset-0">
-              <Image
-                src="/students.jpg"
-                alt="Picture of students"
-                objectFit="cover"
-                layout="fill"
-              />
+            <Image
+              src="/students.jpg"
+              alt="Picture of students"
+              objectFit="cover"
+              layout="fill"
+            />
             <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-50"></div>
           </div>
           <div className="relative z-20 mt-auto">
