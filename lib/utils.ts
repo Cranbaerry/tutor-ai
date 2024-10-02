@@ -10,6 +10,8 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // Note: Specify client if you want to use this function in the server
+// The first time you call the `createBrowserClient` from the `@supabase/ssr` package it creates a Supabase client. 
+// Subsequent times you call the `createBrowserClient` function from anywhere in your app, it will return you the instance that was already created 
 export async function getUserData(supabase: SupabaseClient = createClient()) {
   // const { data: { user } } = await supabase.auth.getuser();
   const { data: { session } } = await supabase.auth.getSession();

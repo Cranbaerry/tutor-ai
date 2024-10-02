@@ -42,6 +42,7 @@ export default function Playground({ language }: IPlaygroundProps) {
     const { messages, input, handleInputChange, handleSubmit, append, setMessages } = useChat({
         onToolCall({ toolCall }) {
             setToolCall(toolCall.toolName);
+            setStatus(`Thinking`);
         },
         onFinish: (message: Message) => {
             if (!/[.!?:]$/.test(message.content)) {
@@ -49,6 +50,11 @@ export default function Playground({ language }: IPlaygroundProps) {
                 setMessageBuffer(message.content);
             }
         },
+        onError: (error: Error) => {
+            console.error('Error:', error);
+            toast.error('There was an error processing your request. Please try again.');
+            setStatus('Listening');
+        }
     });
     const [messageBuffer, setMessageBuffer] = useState<string>('');
     const [messageBufferRead, setMessageBufferRead] = useState<string>('');
@@ -68,7 +74,7 @@ export default function Playground({ language }: IPlaygroundProps) {
 
     const [questionSheetImageSource, setQuestionSheetImageSource] = useState<HTMLImageElement | null>(null);
     const [pauseTimer, setPauseTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
-    const [status, setStatus] = useState<'Listening' | 'Speak to interrupt' | 'Processing'>('Listening');
+    const [status, setStatus] = useState<'Listening' | 'Speak to interrupt' | 'Processing' | 'Thinking'>('Listening');
     const [activeStream, setActiveStream] = useState<'user' | 'bot' | null>('user');
     const [isEmbeddingModelActive, setIsEmbeddingModelActive] = useState<boolean>(false);
     const [isMuted, setIsMuted] = useState<boolean>(false);
