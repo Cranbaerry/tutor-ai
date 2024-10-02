@@ -38,6 +38,7 @@ function Canvas(props: CanvasProps) {
 
   useImperativeHandle(props.canvasRef, () => ({
     handleExport: () => handleExport(),
+    getDimensions: () => dimensions,
   }));
 
   const handleUndo = () => {

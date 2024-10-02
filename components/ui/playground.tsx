@@ -55,6 +55,7 @@ export default function Playground({ language }: IPlaygroundProps) {
     const [currentlyPlayingTTSText, setCurrentlyPlayingTTSText] = useState<string>('');
     const canvasRef = useRef<{
         handleExport: () => string;
+        getDimensions: () => { width: number; height: number };
     }>(null);
     const ttsRef = useRef<{
         generateTTS: (text: string, language: string) => void;
@@ -352,41 +353,41 @@ export default function Playground({ language }: IPlaygroundProps) {
             </AlertDialog>
 
             <Canvas backgroundColor={'#FFFFFF'} canvasRef={canvasRef} questionsSheetImageSource={questionSheetImageSource} />
-            <div className="fixed bottom-8 left-24 w-3/4 flex items-end space-x-2">
+            <div className="fixed bottom-8 left-24 flex items-end space-x-2" style={{ width: 'calc(100% - 8rem)' }}>
                 <div className="flex items-center">
                     <TTS ref={ttsRef} width={50} height={40} onPlayingStatusChange={handleTTSPlayingStatusChange} onReadingTextChange={handleTTSOnReadingTextChange} />
-                    <Badge className="mr-2">{status}</Badge>
+                    <Badge className="mx-2 whitespace-nowrap">{status}</Badge>
                 </div>
 
-                <div className="flex-1">
-                    <div className="text-helper whitespace-normal">
-                        <span className="status mx-1 whitespace-normal break-all">
-                            {activeStream === 'user' ? transcript : currentlyPlayingTTSText}
+                <div className="flex-auto w-full self-center">
+                    <div className="text-helper">
+                        <span className="status whitespace-normal break-all w-full">
+                            {activeStream === 'user' ? transcript : currentlyPlayingTTSText} 
                         </span>
                     </div>
                 </div>
-            </div>
 
-            <div className="fixed right-8 bottom-10 flex gap-2">
-                <TooltipProvider>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button
-                                onClick={toggleMicrophone}
-                                aria-label={isMuted ? 'Mute microphone' : 'Unmute microphone'}
-                                variant="outline"
-                                className="tool__mute p-3"
-                            >
-                                {isMuted ? <MicOff className="h-5 w-5 text-black" /> : <Mic className="h-5 w-5 text-black" />}
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p>{isMuted ? 'Unmute microphone' : 'Mute microphone'}</p>
-                        </TooltipContent>
-                    </Tooltip>
-                </TooltipProvider>
-                <ChatDrawer chatLog={messages} />
-                <DialogFinalAnswer canvasRef={canvasRef} />
+                <div className="flex space-x-2 mb-2">
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    onClick={toggleMicrophone}
+                                    aria-label={isMuted ? 'Mute microphone' : 'Unmute microphone'}
+                                    variant="outline"
+                                    className="tool__mute p-3"
+                                >
+                                    {isMuted ? <MicOff className="h-5 w-5 text-black" /> : <Mic className="h-5 w-5 text-black" />}
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>{isMuted ? 'Unmute microphone' : 'Mute microphone'}</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                    <ChatDrawer chatLog={messages} />
+                    <DialogFinalAnswer canvasRef={canvasRef} />
+                </div>
             </div>
         </>
     );
