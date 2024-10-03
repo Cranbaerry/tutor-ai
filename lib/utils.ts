@@ -3,9 +3,10 @@ import { twMerge } from "tailwind-merge"
 import { createClient } from "./supabase/client";
 import { languages, LanguageDetails } from "./definitions";
 import { File } from '@web-std/file';
-import { SupabaseClient, QueryData } from "@supabase/supabase-js";
+import { PostgrestError, SupabaseClient } from "@supabase/supabase-js";
 import { formSchema } from '@/components/ui/questionnaire-form'
 import { z } from 'zod'
+import { JSONValue } from "ai";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -14,15 +15,14 @@ export function cn(...inputs: ClassValue[]) {
 // Note: Specify client if you want to use this function in the server
 // The first time you call the `createBrowserClient` from the `@supabase/ssr` package it creates a Supabase client. 
 // Subsequent times you call the `createBrowserClient` function from anywhere in your app, it will return you the instance that was already created 
-export async function getUserData(supabase: SupabaseClient = createClient()) {
-  // const { data: { user } } = await supabase.auth.getuser();
-  const { data: { session } } = await supabase.auth.getSession();
-
-  // return user ? experimental_taintObjectReference(
-  //     `Do not pass the whole user object to the client`,
-  //     user
-  // ) : null;
-  return session?.user;
+export async function getUserData(supabase: SupabaseClient = createClient(), useSession = true) {
+  if (useSession) {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.user;
+  } else {
+    const { data: { user } } = await supabase.auth.getUser();
+    return user;
+  }
 }
 
 export function getLanguageDetailsById(id: string): LanguageDetails | undefined {
@@ -67,67 +67,57 @@ export async function isQuestionnaireFinished() {
 
   if (user == null) return false;
 
-  const query = supabase
+  const { data, error } = await supabase
     .from('profiles')
-    .select(`id, whatsapp_number, questionnaires(id)`)
+    .select(`user_id, whatsapp_number, questionnaires(user_id)`)
     .eq("user_id", user.id ?? '')
     .order('created_at', { ascending: false });
 
-  type Query = QueryData<typeof query>;
-
-  const { data, error } = await query;
+  console.log('data', data)
   if (error) throw error;
-  console.log(data[0]?.questionnaires[0]?.id)
 
   if (data == null || data.length == 0)
     return false;
 
-  return data[0].id != null && data[0].questionnaires[0].id != null;
+  return data[0].user_id != null && data[0].questionnaires[0].user_id != null;
 }
 
 type FormData = z.infer<typeof formSchema>;
 export async function insertQuestionnaireData(values: FormData) {
-  const supabase = createClient()
-  const user = await getUserData(supabase)
-  if (user == null)
-    return { error: 'User is not logged in' }
+  const supabase = createClient();
+  const user = await getUserData(supabase);
+  if (!user) return { error: 'User is not logged in' };
 
-  const formData = {
-    full_name: values.fullName as string,
-    user_id: user.id,
-    whatsapp_number: values.whatsappNumber as string,
-    gender: values.gender as string,
-    profession: values.profession as string,
-    education_level: values.educationLevel as string,
-    school: values.school as string,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+  const { data, error } = await supabase.from('profiles').insert({
+    full_name: values.fullName,
+    whatsapp_number: values.whatsappNumber,
+    gender: values.gender,
+    profession: values.profession,
+    education_level: values.educationLevel,
+    school: values.school,
+  }).select();
+  if (error) return { error: error.message };
+
+
+  const insertPromises = Object.entries(values).map(async ([key, value]) => {
+    let answerObject = {
+      type: typeof value,
+      value: value,
+    }
+
+    const { error } = await supabase.from('questionnaires').insert({
+      question_id: key,
+      answer: answerObject,
+    });
+    if (error) throw error;
+  });
+
+  try {
+    await Promise.all(insertPromises);
+  } catch (error: unknown) {
+    const err = error as PostgrestError;
+    return { error: err.message };
   }
 
-  const { data, error } = await supabase.from('profiles').insert(formData).select()
-  if (error)
-    return { error: error.message }
-
-  const profileId = data[0].id
-  const questionFormData = {
-    profile_id: profileId as number,
-    question1: values.question1 as string,
-    question2: values.question2 as string,
-    question3: values.question3 as string,
-    question4: values.question4 as string,
-    question5: JSON.stringify(values.question5) as string,
-    question6: JSON.stringify(values.question6) as string,
-    question7: JSON.stringify(values.question7) as string,
-    question8: values.question8 as string,
-    question9: JSON.stringify(values.question9) as string,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  }
-
-  const { error: questionError } = await supabase.from('questionnaires').insert(questionFormData)
-
-  if (questionError)
-    return { error: questionError.message }
-
-  return { data: { profileId } };
+  return { data: { userId: user.id } };
 }
