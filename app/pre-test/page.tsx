@@ -11,6 +11,7 @@ import { toast } from "sonner"
 import { convertCanvasUriToFile, getUserData } from "@/lib/utils"
 import { uploadImage } from "@/lib/supabase/storage"
 import { createClient } from "@/lib/supabase/client"
+import QuestionnaireForm from "@/components/ui/questionnaire-form"
 
 const Canvas = dynamic(() => import('@/components/ui/canvas'), {
   ssr: false,
@@ -180,6 +181,7 @@ export default function PreTest() {
           <Canvas backgroundColor={'#FFFFFF'} canvasRef={canvasRef} questionsSheetImageSource={null}/>
         </div>
       </main>
+      <QuestionnaireForm />
     </div>
   )
 }

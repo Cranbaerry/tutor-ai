@@ -64,7 +64,7 @@ function AuthPageContent({ isAuthCodeError }: { isAuthCodeError: boolean }) {
     }
 
     toast.success("Successfully signed up", { description: `Hello ${data?.user?.email ?? "Guest"}` });
-    router.push("/kuisioner");
+    router.push("/pre-test");
   }, [router]);
 
   const handleSignIn = useCallback(async (event: React.SyntheticEvent) => {
@@ -85,7 +85,7 @@ function AuthPageContent({ isAuthCodeError }: { isAuthCodeError: boolean }) {
     }
 
     toast.success("Successfully logged in", { description: `Hello ${data?.user?.email ?? "Guest"}` });
-    router.push("/kuisioner");
+    router.push("/pre-test");
   }, [router]);
 
   const handleOAuthLogin = useCallback(async () => {

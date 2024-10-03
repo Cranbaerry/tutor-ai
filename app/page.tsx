@@ -1,17 +1,17 @@
 import { getUserData } from "@/lib/utils";
 import AuthPageContent from "@/components/ui/auth-page-content";
 import { createClient } from "@/lib/supabase/server";
-import { redirect } from 'next/navigation'
+import { redirect } from 'next/navigation';
 import Image from "next/legacy/image";
 
 async function AuthenticationPage({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
   const supabase = createClient();
   const userData = await getUserData(supabase);
   const isAuthCodeError = 'auth-code-error' in searchParams;
-  if (userData) redirect('/kuisioner');
+  if (userData) redirect('/pre-test');
 
   return (
-    <div className="container relative hidden h-[800px] flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0 h-screen">
+    <div className="container relative flex h-screen flex-col items-center justify-center lg:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
       <div className="relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex">
         <div className="absolute inset-0">
           <Image
@@ -44,7 +44,10 @@ async function AuthenticationPage({ searchParams }: { searchParams: { [key: stri
           </blockquote>
         </div>
       </div>
-      <AuthPageContent isAuthCodeError={isAuthCodeError} />
+
+      <div className="flex h-full w-full flex-col justify-center px-6 md:px-8 lg:px-10">
+        <AuthPageContent isAuthCodeError={isAuthCodeError} />
+      </div>
     </div>
   );
 }
