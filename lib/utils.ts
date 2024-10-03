@@ -73,7 +73,6 @@ export async function isQuestionnaireFinished() {
     .eq("user_id", user.id ?? '')
     .order('created_at', { ascending: false });
 
-  console.log('data', data)
   if (error) throw error;
 
   if (data == null || data.length == 0)
