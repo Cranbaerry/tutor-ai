@@ -110,7 +110,6 @@ export default function QuestionnaireForm() {
     };
 
     const handleNextError = async (formErrors: Record<string, { message: string }>) => {
-        console.log('HandleNextError');
         switch (activeSection) {
             case 0:
                 if (!formErrors.agreements) {

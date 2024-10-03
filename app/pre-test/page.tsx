@@ -51,8 +51,6 @@ export default function PreTest() {
 
     const user = await getUserData()
     const canvasDataUrl = canvasRef.current?.handleExport();
-    console.log('canvasDataUrl', canvasDataUrl);
-    
     const canvasFile = convertCanvasUriToFile(canvasDataUrl, user?.id);
     const { storage } = createClient();
     const { imageUrl, error } = await uploadImage({
