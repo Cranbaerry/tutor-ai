@@ -9,15 +9,21 @@ import { convertCanvasUriToFile, getUserData } from "@/lib/utils"
 import { uploadImage } from "@/lib/supabase/storage"
 
 async function saveChat(currentMessage: Message, responseText: string, imageUri: string, languageId: string) {
+    console.info('log saveChat', 1);
     const supabase = createClient();
+    console.info('log saveChat', 2);
     const user = await getUserData(supabase);
+    console.info('log saveChat', 3);
 
     if (!user) {
         console.error('User is not logged in');
         return;
     }
 
+    console.info('log saveChat', 4);
     const canvasFile = convertCanvasUriToFile(imageUri, user.id);
+
+    console.info('log saveChat', 5);
     const { imageUrl, error } = await uploadImage({
         storage: supabase.storage,
         file: canvasFile,
@@ -25,11 +31,15 @@ async function saveChat(currentMessage: Message, responseText: string, imageUri:
         folder: user.id,
     });
 
+    console.info('log saveChat', 6);
+
     if (error) {
         console.error('Error uploading image:', error);
         return;
     }
 
+    
+    console.info('log saveChat', 7);
     const { error: userChatError } = await supabase
         .from('chat')
         .insert([{
@@ -39,11 +49,13 @@ async function saveChat(currentMessage: Message, responseText: string, imageUri:
             language: languageId
         }]);
 
+    console.info('log saveChat', 8);
     if (userChatError) {
         console.error('Error saving user message:', userChatError);
         return;
     }
 
+    console.info('log saveChat', 9);
     const { error: responseChatError } = await supabase
         .from('chat')
         .insert([{
@@ -52,6 +64,7 @@ async function saveChat(currentMessage: Message, responseText: string, imageUri:
             image_url: imageUrl
         }]);
 
+        console.info('log saveChat', 10);
     if (responseChatError) {
         console.error('Error saving assistant message:', responseChatError);
         return;
