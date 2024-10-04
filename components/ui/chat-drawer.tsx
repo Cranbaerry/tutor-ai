@@ -28,6 +28,7 @@ export default function ChatDrawer({ chatLog }: ChatDrawerProps) {
     const scrollAreaRef = useRef<HTMLDivElement>(null)
     const supabase = createClient()
     const [userName, setUserName] = useState<string | null>(null);
+    const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>('https://api.dicebear.com/6.x/initials/svg?seed=User');
 
     const handleOpenChange = (newOpen: boolean) => {
         setOpen(newOpen)
@@ -47,6 +48,7 @@ export default function ChatDrawer({ chatLog }: ChatDrawerProps) {
         if (userData) {
             const userName = await supabase.from('profiles').select('fullname').eq('user_id', userData.id).single();
             if (userName) setUserName(userName.data?.fullname ?? 'User');
+            setProfilePictureUrl(userData.user_metadata?.profilePictureUrl ?? `https://api.dicebear.com/6.x/initials/svg?seed=${userName.data?.fullname ?? 'User'}`);
         }
     }
 
@@ -97,7 +99,7 @@ export default function ChatDrawer({ chatLog }: ChatDrawerProps) {
                                     {message.role === 'assistant' ? (
                                         <AvatarImage src="/beexpert-logo.svg" alt="Assistant" />
                                     ) : (
-                                        <AvatarImage src={`https://api.dicebear.com/6.x/initials/svg?seed=${message.role}`} alt="User" />
+                                        <AvatarImage src={profilePictureUrl} alt="User" />
                                     )}
                                     <AvatarFallback>{message.role[0].toUpperCase()}</AvatarFallback>
                                 </Avatar>

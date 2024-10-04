@@ -112,8 +112,8 @@ export default function Playground({ language }: IPlaygroundProps) {
 
             const options: ChatRequestOptions = {
                 data: {
-                    imageUrl: canvasDataUrl as JSONValue,
-                    language: language as JSONValue
+                    imageUri: canvasDataUrl as JSONValue,
+                    languageId: language as JSONValue
                 },
             };
 
@@ -210,14 +210,16 @@ export default function Playground({ language }: IPlaygroundProps) {
             return;
         }
 
-        const messages: Message[] = dbMessages.map((dbMessage: any) => {
-            return {
-                id: dbMessage.id,
-                role: dbMessage.role,
-                content: dbMessage.content,
-                createdAt: dbMessage.created_at,
-            };
-        });
+        const messages: Message[] = dbMessages
+            .filter((dbMessage: any) => dbMessage.types.includes('text'))
+            .map((dbMessage: any) => {
+                return {
+                    id: dbMessage.id,
+                    role: dbMessage.role,
+                    content: dbMessage.content,
+                    createdAt: dbMessage.created_at,
+                };
+            });
 
         setMessages(messages);
         setIsMessagesLoaded(true);
@@ -368,7 +370,7 @@ export default function Playground({ language }: IPlaygroundProps) {
                 <div className="flex-auto w-full self-center">
                     <div className="text-helper">
                         <span className="status whitespace-normal break-all w-full">
-                            {activeStream === 'user' ? transcript : currentlyPlayingTTSText} 
+                            {activeStream === 'user' ? transcript : currentlyPlayingTTSText}
                         </span>
                     </div>
                 </div>

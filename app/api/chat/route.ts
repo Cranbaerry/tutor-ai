@@ -1,4 +1,4 @@
-import { convertToCoreMessages, streamText, tool, generateObject, UserContent } from 'ai';
+import { convertToCoreMessages, streamText, tool, generateObject, UserContent, CoreAssistantMessage, CoreToolMessage, AssistantContent, ToolContent } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { findRelevantContent } from '@/lib/embeddings';
 import { z } from 'zod';
@@ -8,76 +8,102 @@ import { Message } from 'ai';
 import { convertCanvasUriToFile, getUserData } from "@/lib/utils"
 import { uploadImage } from "@/lib/supabase/storage"
 
-async function saveChat(currentMessage: Message, responseText: string, imageUri: string, languageId: string) {
-    console.info('log saveChat', 1);
+type Metadata = {
+    imageUri: string;
+    languageId: string;
+}
+
+type ExtractedContent = {
+    types: string[];
+    content: string;
+}
+
+async function saveChat(currentMessage: Message, responseMessages: Array<CoreAssistantMessage | CoreToolMessage>, data: Metadata) {
     const supabase = createClient();
-    console.info('log saveChat', 2);
     const user = await getUserData(supabase);
-    console.info('log saveChat', 3);
 
-    if (!user) {
-        console.error('User is not logged in');
-        return;
-    }
+    if (!user) throw new Error('User is not logged in');
 
-    console.info('log saveChat', 4);
-    const canvasFile = convertCanvasUriToFile(imageUri, user.id);
-
-    console.info('log saveChat', 5);
-    const { imageUrl, error } = await uploadImage({
+    const canvasFile = convertCanvasUriToFile(data.imageUri, user.id);
+    const { imageUrl, error: uploadError } = await uploadImage({
         storage: supabase.storage,
         file: canvasFile,
         bucket: "chat",
         folder: user.id,
     });
 
-    console.info('log saveChat', 6);
+    if (uploadError) throw new Error(`Error uploading image: ${uploadError}`);
 
-    if (error) {
-        console.error('Error uploading image:', error);
-        return;
-    }
-
-    
-    console.info('log saveChat', 7);
-    const { error: userChatError } = await supabase
-        .from('chat')
-        .insert([{
+    const chatInsertions = [
+        {
             role: currentMessage.role,
             content: currentMessage.content,
             image_url: imageUrl,
-            language: languageId
-        }]);
+            language: data.languageId,
+            created_at: new Date(),
+            types: ['text'],
+        },
+        ...responseMessages.map(message => {
+            const { types, content } = extractMessageContent(message.content);
+            return {
+                role: message.role,
+                content: content,
+                image_url: imageUrl,
+                language: data.languageId,
+                created_at: new Date(),
+                types: types,
+            };
+        })
+    ];
 
-    console.info('log saveChat', 8);
-    if (userChatError) {
-        console.error('Error saving user message:', userChatError);
-        return;
-    }
-
-    console.info('log saveChat', 9);
-    const { error: responseChatError } = await supabase
+    const { error: insertError } = await supabase
         .from('chat')
-        .insert([{
-            role: 'assistant',
-            content: responseText,
-            image_url: imageUrl
-        }]);
+        .insert(chatInsertions);
 
-        console.info('log saveChat', 10);
-    if (responseChatError) {
-        console.error('Error saving assistant message:', responseChatError);
-        return;
-    }
-
-    console.info('Chat saved successfully');
+    if (insertError) throw new Error(`Error inserting chat: ${insertError.message}`);
 }
 
+function extractMessageContent(content: AssistantContent | ToolContent): ExtractedContent {
+    if (typeof content === 'string') return { types: ['text'], content };
+
+    if (Array.isArray(content)) {
+        const contentTypes: string[] = [];
+        const extractedContent = content.map(item => {
+            if (typeof item === 'object') {
+                contentTypes.push(item.type);
+                switch (item.type) {
+                    case 'text':
+                        if (!item.text) {
+                            contentTypes.pop();
+                            return '';
+                        }
+                        return item.text;
+                    case 'tool-result':
+                        return `Tool result from ${item.toolName}: ${JSON.stringify(item.result)}`;
+                    case 'tool-call':
+                        return `Tool call to ${item.toolName} with args: ${JSON.stringify(item.args)}`;
+                    default:
+                        return `Unknown content type: ${JSON.stringify(item)}`;
+                }
+            }
+            return '';
+        }).filter(result => result !== '').join(' ');
+
+        return { types: contentTypes, content: extractedContent };
+    }
+
+    //if (typeof content === 'object' && content.type === 'text') return content.text;
+    // Handle any other unknown or unsupported content types
+    return { types: ['unknown'], content: JSON.stringify(content) };
+}
+
+
+
 export async function POST(req: Request) {
-    const { messages, data } = await req.json();
+    const { messages, data }: { messages: Message[], data: Metadata } = await req.json();
     const initialMessages: Message[] = messages.slice(0, -1);
     const currentMessage: Message = messages[messages.length - 1];
-    const langDetails = getLanguageDetailsById(data.language);
+    const langDetails = getLanguageDetailsById(data.languageId);
     const language = langDetails?.name ?? 'Indonesian';
     const model = process.env.OPENAI_GPT_MODEL ?? 'gpt-4o-mini';
 
@@ -110,7 +136,7 @@ export async function POST(req: Request) {
                 role: 'user',
                 content: [
                     { type: 'text', text: currentMessage.content },
-                    { type: 'image', image: new URL(data.imageUrl) },
+                    { type: 'image', image: new URL(data.imageUri) },
                 ],
             },
         ],
@@ -168,9 +194,8 @@ export async function POST(req: Request) {
                 }),
             }),
         },
-        onFinish({ text }) {
-            console.info("Saving chat");
-            saveChat(currentMessage, text, data.imageUrl, data.language);
+        onFinish({ responseMessages }) {
+            saveChat(currentMessage, responseMessages, data);
         },
     });
 
