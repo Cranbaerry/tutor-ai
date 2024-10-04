@@ -8,7 +8,7 @@ import { Message } from 'ai';
 import { convertCanvasUriToFile, getUserData } from "@/lib/utils"
 import { uploadImage } from "@/lib/supabase/storage"
 
-async function saveChat(currentMessage: Message, responseText: string, imageUri: string) {
+async function saveChat(currentMessage: Message, responseText: string, imageUri: string, languageId: string) {
     const supabase = createClient();
     const user = await getUserData(supabase);
 
@@ -35,7 +35,8 @@ async function saveChat(currentMessage: Message, responseText: string, imageUri:
         .insert([{
             role: currentMessage.role,
             content: currentMessage.content,
-            image_url: imageUrl
+            image_url: imageUrl,
+            language: languageId
         }]);
 
     if (userChatError) {
@@ -51,7 +52,12 @@ async function saveChat(currentMessage: Message, responseText: string, imageUri:
             image_url: imageUrl
         }]);
 
-    console.error('Error saving assistant message:', responseChatError);
+    if (responseChatError) {
+        console.error('Error saving assistant message:', responseChatError);
+        return;
+    }
+
+    console.info('Chat saved successfully');
 }
 
 export async function POST(req: Request) {
@@ -150,7 +156,8 @@ export async function POST(req: Request) {
             }),
         },
         onFinish({ text }) {
-            saveChat(currentMessage, text, data.imageUrl);
+            console.info("Saving chat");
+            saveChat(currentMessage, text, data.imageUrl, data.language);
         },
     });
 
