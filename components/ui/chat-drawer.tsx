@@ -28,7 +28,7 @@ export default function ChatDrawer({ chatLog }: ChatDrawerProps) {
     const scrollAreaRef = useRef<HTMLDivElement>(null)
     const supabase = createClient()
     const [userName, setUserName] = useState<string | null>(null);
-    const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>('https://api.dicebear.com/6.x/initials/svg?seed=User');
+    const [profilePictureUrl, setProfilePictureUrl] = useState<string>('https://api.dicebear.com/6.x/initials/svg?seed=User');
 
     const handleOpenChange = (newOpen: boolean) => {
         setOpen(newOpen)

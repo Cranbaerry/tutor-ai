@@ -66,7 +66,7 @@ async function saveChat(currentMessage: Message, responseMessages: Array<CoreAss
 function extractMessageContent(content: AssistantContent | ToolContent): ExtractedContent {
     if (typeof content === 'string') return { types: ['text'], content };
 
-    if (Array.isArray(content)) {
+    if (Array.isArray(content)) {   
         const contentTypes: string[] = [];
         const extractedContent = content.map(item => {
             if (typeof item === 'object') {
