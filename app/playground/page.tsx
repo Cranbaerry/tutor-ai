@@ -200,7 +200,7 @@ export default function Main() {
     },[])
 
     return (
-        <div className="hidden h-full flex-col md:flex">
+        <div className="h-full flex flex-col md:flex">
             <Joyride
                 callback={handleJoyrideCallback}
                 continuous

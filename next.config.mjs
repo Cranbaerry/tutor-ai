@@ -6,7 +6,8 @@ const nextConfig = {
   experimental: {
     serverActions: {
       allowedOrigins: [
-        'localhost:3000', // localhost
+        'localhost:3000',
+        'localhost:3001',
         // 'supreme-journey-69p7qp7x45r346jq-3000.app.github.dev', // Codespaces
       ],
     },

@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/popover"
 import { ColorPicker } from "@/components/ui/color-picker"
 import { Image as KonvaImage } from 'react-konva';
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 function Canvas(props: CanvasProps) {
   const stageParentRef = useRef<HTMLDivElement>(null);
@@ -166,7 +167,7 @@ function Canvas(props: CanvasProps) {
     <TooltipProvider>
       <Card className="h-full">
         <div className="flex bg-background h-full">
-          <div className="w-16 bg-muted p-2 flex flex-col space-y-4 border-r">
+          <ScrollArea className="w-16 bg-muted p-2 flex flex-col space-y-4 border-r">
             <TooltipWrapper content="Drag">
               <Button
                 onClick={() => setTool('drag')}
@@ -251,7 +252,7 @@ function Canvas(props: CanvasProps) {
               </Button>
             </TooltipWrapper>
             <div className="text-xs text-center">{Math.round(scale * 100)}%</div>
-          </div>
+          </ScrollArea>
           <div className="flex-1 overflow-auto">
             <div ref={stageParentRef} className="h-full w-full">
               <Stage
