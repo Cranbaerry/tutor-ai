@@ -129,7 +129,9 @@ export async function POST(req: Request) {
             Avoid any complex formatting that cannot be spoken directly. If an equation is long, break it down into smaller parts. 
             Use commas or pauses in long expressions to make them more natural for speech.
             
-            Always balance feedback with motivation and appreciation to ensure the user feels supported and encouraged.`,
+            Always balance feedback with motivation and appreciation to ensure the user feels supported and encouraged.
+            
+            Please reply to the user in ${language}.`,
         messages: [
             ...convertToCoreMessages(initialMessages),
             {
