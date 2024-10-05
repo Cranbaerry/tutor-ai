@@ -6,7 +6,8 @@ export async function POST(req: Request) {
     const tts = new MsEdgeTTS();
 
     // Replace "cos" with "kos" to avoid Azure TTS mispronouncing it as "cos" in Bahasa Indonesia
-    const processedText = text.replace(/\bcos\b/gi, 'kos');
+    let processedText = text;
+    if (language === 'id-ID') processedText = text.replace(/\bcos\b/gi, 'kos').replace(/\bcosinus\b/gi, 'kosinus');
 
     // VOICE LIST: https://gist.github.com/BettyJJ/17cbaa1de96235a7f5773b8690a20462
     const langDetails = getLanguageDetailsById(language);
