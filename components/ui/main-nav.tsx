@@ -1,16 +1,24 @@
-'use client'
+"use client";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { ExitIcon } from "@radix-ui/react-icons";
 import { LanguageCode } from "@/lib/definitions";
 import { logout } from "@/app/logout/actions";
 import { DialogDemo } from "./demo-dialog";
-import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "./alert-dialog";
 
-interface IMainNavProps extends React.HTMLAttributes<HTMLElement>{
+interface IMainNavProps extends React.HTMLAttributes<HTMLElement> {
   enableChangeLanguage?: boolean;
   language?: LanguageCode;
   onChangeLanguage: ((language: LanguageCode) => void) | (() => void);
@@ -19,71 +27,76 @@ interface IMainNavProps extends React.HTMLAttributes<HTMLElement>{
 export function MainNav({
   className,
   enableChangeLanguage,
-  language,
+  // language,
   onChangeLanguage,
   ...props
 }: IMainNavProps) {
-  const [isLanguageEN, setIsLanguageEN] = useState(false)
-  const [isAlertChangeLangOpen, setIsAlertChangeLangOpen] = useState(false)
+  const [isLanguageEN, setIsLanguageEN] = useState(false);
+  const [isAlertChangeLangOpen, setIsAlertChangeLangOpen] = useState(false);
 
   useEffect(() => {
-    if(isLanguageEN){
-      onChangeLanguage("en-US")
-    } else{
-      onChangeLanguage('id-ID')
+    if (isLanguageEN) {
+      onChangeLanguage("en-US");
+    } else {
+      onChangeLanguage("id-ID");
     }
-  }, [isLanguageEN])
+  }, [isLanguageEN, onChangeLanguage]);
 
   const onChangeLanguageToggle = () => {
-    setIsLanguageEN(!isLanguageEN)
-    setIsAlertChangeLangOpen(true)
-  }
+    setIsLanguageEN(!isLanguageEN);
+    setIsAlertChangeLangOpen(true);
+  };
 
   return (
     <nav
       className={cn("flex items-center space-x-4 lg:space-x-8", className)}
       {...props}
     >
-      {
-        enableChangeLanguage && (
-          <div className="switch__lang flex items-center space-x-2">
-            <Label htmlFor="lang-switch">Indonesia</Label>
-            <Switch
-              id="lang-switch"
-              checked={isLanguageEN}
-              onCheckedChange={onChangeLanguageToggle}
-            />
-            <Label htmlFor="lang-switch">English</Label>
-          </div>
-        )
-      }
-      <div
-        className="demo__project text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-      >
+      {enableChangeLanguage && (
+        <div className="switch__lang flex items-center space-x-2">
+          <Label htmlFor="lang-switch">Indonesia</Label>
+          <Switch
+            id="lang-switch"
+            checked={isLanguageEN}
+            onCheckedChange={onChangeLanguageToggle}
+          />
+          <Label htmlFor="lang-switch">English</Label>
+        </div>
+      )}
+      <div className="demo__project text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
         <DialogDemo />
       </div>
       <form action={logout}>
-        <button type="submit" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary flex items-center space-x-4">
-          <ExitIcon className="h-4 w-4 mr-2"/>
+        <button
+          type="submit"
+          className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary flex items-center space-x-4"
+        >
+          <ExitIcon className="h-4 w-4 mr-2" />
           Keluar
         </button>
       </form>
 
-      <AlertDialog open={isAlertChangeLangOpen} onOpenChange={setIsAlertChangeLangOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Bahasa komunikasi berhasil diubah!</AlertDialogTitle>
-              <AlertDialogDescription>
-                Sekarang, kamu bisa berinteraksi dengan BEEXPERT menggunakan bahasa {isLanguageEN ? 'Inggris': 'Indonesia'}.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogAction onClick={() => setIsAlertChangeLangOpen(false)}>
-                Mengerti
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
+      <AlertDialog
+        open={isAlertChangeLangOpen}
+        onOpenChange={setIsAlertChangeLangOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Bahasa komunikasi berhasil diubah!
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Sekarang, kamu bisa berinteraksi dengan BEEXPERT menggunakan
+              bahasa {isLanguageEN ? "Inggris" : "Indonesia"}.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setIsAlertChangeLangOpen(false)}>
+              Mengerti
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
       </AlertDialog>
     </nav>
-  )
+  );
 }

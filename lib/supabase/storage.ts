@@ -1,14 +1,19 @@
 import { v4 as uuidv4 } from "uuid";
-import { StorageClient} from "@supabase/storage-js";
+import { StorageClient } from "@supabase/storage-js";
 
 type UploadProps = {
-  storage: StorageClient
+  storage: StorageClient;
   file: File;
   bucket: string;
   folder?: string;
 };
 
-export const uploadImage = async ({ file, bucket, storage, folder }: UploadProps) => {
+export const uploadImage = async ({
+  file,
+  bucket,
+  storage,
+  folder,
+}: UploadProps) => {
   const fileName = file.name;
   const fileExtension = fileName.slice(fileName.lastIndexOf(".") + 1);
   const path = `${folder ? folder + "/" : ""}${uuidv4()}.${fileExtension}`;
@@ -20,8 +25,9 @@ export const uploadImage = async ({ file, bucket, storage, folder }: UploadProps
   }
 
   const imageUrl = `${process.env
-    .NEXT_PUBLIC_SUPABASE_URL!}/storage/v1/object/public/${bucket}/${data?.path
-    }`;
+    .NEXT_PUBLIC_SUPABASE_URL!}/storage/v1/object/public/${bucket}/${
+    data?.path
+  }`;
 
   return { imageUrl, error: "" };
 };

@@ -1,48 +1,37 @@
-'use server'
+"use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { redirect } from 'next/navigation'
+import { formSchema } from "@/components/ui/final-answer-dialog";
+import { z } from "zod";
 
-export async function isNewUser(){
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+export async function insert(
+  values: z.infer<typeof formSchema> & { imageUrl: string | null },
+) {
+  const supabase = createClient();
 
-    const dateNow = new Date()
+  // type-casting here for convenience
+  // in practice, you should validate your inputs
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-    if(user){
-        const createdDateUser = new Date(user.created_at)
+  if (user == null) {
+    return false;
+  }
 
-        if(createdDateUser.getDate() == dateNow.getUTCDate())
-            return true
-        else
-            return false
-    }
-    return false
-}
+  const formData = {
+    user_id: user.id,
+    question1: values.question1,
+    question2: values.question2,
+    question3: values.question3,
+    image_url: values.imageUrl,
+  };
 
-export async function insert(values: any) {
-    const supabase = createClient()
+  const { error } = await supabase
+    .from("final_answers")
+    .insert(formData)
+    .select();
+  if (error) return false;
 
-    // type-casting here for convenience
-    // in practice, you should validate your inputs
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (user == null) {
-        return false;
-    }
-
-    const formData = {
-        user_id: user.id,
-        question1: values.question1,
-        question2: values.question2,
-        question3: values.question3,
-        image_url: values.imageUrl
-    }
-
-    const { data, error } = await supabase.from('final_answers').insert(formData).select()
-    if (error) {
-        return false;
-    }
-
-    return true;
+  return true;
 }

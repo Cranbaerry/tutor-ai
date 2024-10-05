@@ -103,7 +103,9 @@
     height: 28px;
     border-radius: 8px;
     border: 3px solid #fff;
-    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+    box-shadow:
+      0 0 0 1px rgba(0, 0, 0, 0.1),
+      inset 0 0 0 1px rgba(0, 0, 0, 0.1);
     cursor: pointer;
   }
 
@@ -122,10 +124,15 @@
   }
 
   @keyframes wipeInOut {
-    0%, 100% { clip-path: inset(0 100% 0 0); }
-    50% { clip-path: inset(0 0 0 0); }
+    0%,
+    100% {
+      clip-path: inset(0 100% 0 0);
+    }
+    50% {
+      clip-path: inset(0 0 0 0);
+    }
   }
-  
+
   .animate-wipe-in-out {
     animation: wipeInOut 8s infinite;
   }

@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -7,8 +7,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { DialogClose } from "@radix-ui/react-dialog"
+} from "@/components/ui/dialog";
+import { DialogClose } from "@radix-ui/react-dialog";
 
 function DialogDemo() {
   return (
@@ -24,23 +24,26 @@ function DialogDemo() {
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-              <iframe 
-                width="560" 
-                height="315" 
-                src="https://www.youtube.com/embed/cSnRY-zG_Pg?si=P7WitPD4Nagna421" 
-                title="YouTube video player" 
-                frameBorder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                referrerPolicy="strict-origin-when-cross-origin" 
-                allowFullScreen></iframe>
+          <iframe
+            width="560"
+            height="315"
+            src="https://www.youtube.com/embed/cSnRY-zG_Pg?si=P7WitPD4Nagna421"
+            title="YouTube video player"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+          ></iframe>
         </div>
         <DialogFooter>
-          <Button><DialogClose>Selesai</DialogClose></Button>
+          <Button>
+            <DialogClose>Selesai</DialogClose>
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
-DialogDemo.displayName = 'DialogDemo';
+DialogDemo.displayName = "DialogDemo";
 export { DialogDemo };

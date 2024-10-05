@@ -10,12 +10,12 @@ import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase"
 import { HuggingFaceInferenceEmbeddings } from "@langchain/community/embeddings/hf";
 const embeddings = new HuggingFaceInferenceEmbeddings({
   model: "BAAI/bge-m3",
-  apiKey: process.env.HUGGINGFACEHUB_API_KEY ?? ''
+  apiKey: process.env.HUGGINGFACEHUB_API_KEY ?? "",
 });
 
 const supabaseClient = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '',
+  process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "",
 );
 
 export const vectorStore = new SupabaseVectorStore(embeddings, {
@@ -27,4 +27,4 @@ export const vectorStore = new SupabaseVectorStore(embeddings, {
 export const findRelevantContent = async (userQuery: string) => {
   const similarGuides = await vectorStore.similaritySearch(userQuery, 5);
   return similarGuides;
-}
+};

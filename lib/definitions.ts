@@ -1,21 +1,25 @@
-
 export type CanvasProps = {
   backgroundColor: string;
-  canvasRef: any;
+  canvasRef: React.RefObject<CanvasRef>;
   questionsSheetImageSource?: CanvasImageSource | null;
-}
+};
 
-export type CanvasWrapperProps = {
-  backgroundColor: string;
-  ref: any;
-}
+export type CanvasRef = {
+  handleExport: () => string;
+  getDimensions: () => { width: number; height: number };
+};
+
+// export type CanvasWrapperProps = {
+//   backgroundColor: string;
+//   ref: any;
+// }
 
 export type LineData = {
   tool: string;
   points: number[];
   color: string;
   size: number;
-}
+};
 
 export type LoginData = {
   email: string;
@@ -30,15 +34,15 @@ export type LanguageDetails = {
 
 export const languages: LanguageDetails[] = [
   {
-    id: 'en-US',
-    name: 'English',
-    azureSpeechVoiceName: 'en-US-JennyNeural',
+    id: "en-US",
+    name: "English",
+    azureSpeechVoiceName: "en-US-JennyNeural",
   },
   {
-    id: 'id-ID',
-    name: 'Indonesian',
-    azureSpeechVoiceName: 'id-ID-ArdiNeural',
-  }
+    id: "id-ID",
+    name: "Indonesian",
+    azureSpeechVoiceName: "id-ID-ArdiNeural",
+  },
 ];
 
-export type LanguageCode = (typeof languages[number])['id'];
+export type LanguageCode = (typeof languages)[number]["id"];

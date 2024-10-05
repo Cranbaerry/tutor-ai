@@ -1,14 +1,18 @@
 import { getUserData } from "@/lib/utils";
 import AuthPageContent from "@/components/ui/auth-page-content";
 import { createClient } from "@/lib/supabase/server";
-import { redirect } from 'next/navigation';
+import { redirect } from "next/navigation";
 import Image from "next/legacy/image";
 
-async function AuthenticationPage({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
+async function AuthenticationPage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
   const supabase = createClient();
   const userData = await getUserData(supabase);
-  const isAuthCodeError = 'auth-code-error' in searchParams;
-  if (userData) redirect('/pre-test');
+  const isAuthCodeError = "auth-code-error" in searchParams;
+  if (userData) redirect("/pre-test");
 
   return (
     <div className="container relative flex h-screen flex-col items-center justify-center lg:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
@@ -25,11 +29,18 @@ async function AuthenticationPage({ searchParams }: { searchParams: { [key: stri
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
             <p className="text-base">
-              Platform bimbingan belajar berbasis AI yang dirancang untuk siswa SMA yang memungkinkan siswa untuk memasukkan pertanyaan melalui suara dan gambar secara langsung.
+              Platform bimbingan belajar berbasis AI yang dirancang untuk siswa
+              SMA yang memungkinkan siswa untuk memasukkan pertanyaan melalui
+              suara dan gambar secara langsung.
             </p>
             <footer className="text-xs italic">
-              Bagian dari penelitian &ldquo;Chatbot System with Retrieval Augmented Generation for Enhanced Self-learning Experience&rdquo; oleh{" "}
-              <a href="https://www.linkedin.com/in/angeline-mary-marchella/" target="_blank">
+              Bagian dari penelitian &ldquo;Chatbot System with Retrieval
+              Augmented Generation for Enhanced Self-learning Experience&rdquo;
+              oleh{" "}
+              <a
+                href="https://www.linkedin.com/in/angeline-mary-marchella/"
+                target="_blank"
+              >
                 Angeline Mary Marchella
               </a>
               ,{" "}
@@ -37,9 +48,13 @@ async function AuthenticationPage({ searchParams }: { searchParams: { [key: stri
                 Naufal Hardiansyah
               </a>
               , dan{" "}
-              <a href="https://www.linkedin.com/in/nathaniel-candra-b21288206/" target="_blank">
+              <a
+                href="https://www.linkedin.com/in/nathaniel-candra-b21288206/"
+                target="_blank"
+              >
                 Nathaniel Chandra
-              </a>.
+              </a>
+              .
             </footer>
           </blockquote>
         </div>
