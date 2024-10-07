@@ -29,6 +29,7 @@ import { useState } from "react";
 import { convertCanvasUriToFile, getUserData } from "@/lib/utils";
 import { uploadImage } from "@/lib/supabase/storage";
 import { createClient } from "@/lib/supabase/client";
+import { CanvasRef } from "@/lib/definitions";
 
 export const formSchema = z.object({
   question1: z.string({
@@ -43,9 +44,7 @@ export const formSchema = z.object({
 });
 
 interface IDialogFinalAnswerProps {
-  canvasRef: React.RefObject<{
-    handleExport: () => string;
-  }>;
+  canvasRef: CanvasRef | null;
 }
 
 function DialogFinalAnswer({ canvasRef }: IDialogFinalAnswerProps) {
@@ -71,7 +70,7 @@ function DialogFinalAnswer({ canvasRef }: IDialogFinalAnswerProps) {
     setLoading(true);
 
     const user = await getUserData();
-    const canvasDataUrl = canvasRef.current?.handleExport();
+    const canvasDataUrl = canvasRef?.handleExport();
 
     const canvasFile = convertCanvasUriToFile(canvasDataUrl, user?.id);
     const { storage } = createClient();

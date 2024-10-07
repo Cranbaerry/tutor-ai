@@ -11,6 +11,7 @@ import { insert } from "./actions";
 import { uploadImage } from "@/lib/supabase/storage";
 import { convertCanvasUriToFile, getUserData } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { CanvasRef } from "@/lib/definitions";
 
 const Canvas = dynamic(() => import("@/components/ui/canvas"), {
   ssr: false,
@@ -33,9 +34,7 @@ export default function PostTest() {
     { letter: "D", opt: "cos(45)" },
   ];
 
-  const canvasRef = useRef<{
-    handleExport: () => string;
-  }>(null);
+  const canvasRef = useRef<CanvasRef>(null);
 
   const handleAnswer = (opt: string, letter: string) => {
     if (!submitted) {

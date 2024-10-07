@@ -12,6 +12,7 @@ import { convertCanvasUriToFile, getUserData } from "@/lib/utils";
 import { uploadImage } from "@/lib/supabase/storage";
 import { createClient } from "@/lib/supabase/client";
 import QuestionnaireForm from "@/components/ui/questionnaire-form";
+import { CanvasRef } from "@/lib/definitions";
 
 const Canvas = dynamic(() => import("@/components/ui/canvas"), {
   ssr: false,
@@ -34,9 +35,7 @@ export default function PreTest() {
     { letter: "D", opt: "-cos(P + Q)" },
   ];
 
-  const canvasRef = useRef<{
-    handleExport: () => string;
-  }>(null);
+  const canvasRef = useRef<CanvasRef>(null);
 
   const handleAnswer = (opt: string, letter: string) => {
     if (!submitted) {

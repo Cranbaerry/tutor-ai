@@ -453,7 +453,7 @@ export default function Playground({ language }: IPlaygroundProps) {
             </Tooltip>
           </TooltipProvider>
           <ChatDrawer chatLog={messages} />
-          <DialogFinalAnswer canvasRef={canvasRef} />
+          <DialogFinalAnswer canvasRef={canvasRef.current} />
         </div>
       </div>
     </>
