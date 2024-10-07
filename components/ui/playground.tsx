@@ -80,9 +80,7 @@ export default function Playground({ language }: IPlaygroundProps) {
 
   const [questionSheetImageSource, setQuestionSheetImageSource] =
     useState<HTMLImageElement | null>(null);
-  const [pauseTimer, setPauseTimer] = useState<ReturnType<
-    typeof setTimeout
-  > | null>(null);
+  const pauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [status, setStatus] = useState<
     "Listening" | "Speak to interrupt" | "Processing" | "Thinking"
   >("Listening");
@@ -114,41 +112,46 @@ export default function Playground({ language }: IPlaygroundProps) {
     });
   };
 
-  const sendTranscript = useCallback(async () => {
-    if (finalTranscript.trim() !== "") {
-      setStatus("Processing");
-      if (ttsRef.current) ttsRef.current.clearTTSQueue();
-      const canvasDataUrl = canvasRef.current?.handleExport();
-      const message: CreateMessage = {
-        role: "user",
-        content: finalTranscript.trim(),
-      };
-
-      const options: ChatRequestOptions = {
-        data: {
-          imageUri: canvasDataUrl as JSONValue,
-          languageId: language as JSONValue,
-        },
-      };
-
-      console.log("Sending transcript:", finalTranscript);
-      append(message, canvasDataUrl ? options : undefined);
-    }
-  }, [finalTranscript, language, append]);
-
   useEffect(() => {
-    if (finalTranscript) {
-      if (pauseTimer) {
-        clearTimeout(pauseTimer);
+    const sendTranscript = () => {
+      if (finalTranscript.trim() !== "") {
+        setStatus("Processing");
+        if (ttsRef.current) ttsRef.current.clearTTSQueue();
+        const canvasDataUrl = canvasRef.current?.handleExport();
+        const message: CreateMessage = {
+          role: "user",
+          content: finalTranscript.trim(),
+        };
+
+        const options: ChatRequestOptions = {
+          data: {
+            imageUri: canvasDataUrl as JSONValue,
+            languageId: language as JSONValue,
+          },
+        };
+
+        console.log("Sending transcript:", finalTranscript);
+        append(message, canvasDataUrl ? options : undefined);
       }
-      setPauseTimer(
-        setTimeout(() => {
-          sendTranscript();
-          resetTranscript();
-        }, 2000),
-      );
+    };
+
+    if (finalTranscript) {
+      if (pauseTimerRef.current) {
+        clearTimeout(pauseTimerRef.current);
+      }
+      pauseTimerRef.current = setTimeout(() => {
+        sendTranscript();
+        resetTranscript();
+      }, 2000);
     }
-  }, [finalTranscript, pauseTimer, resetTranscript, sendTranscript]);
+
+    // Clean up the timer on unmount or when finalTranscript changes
+    return () => {
+      if (pauseTimerRef.current) {
+        clearTimeout(pauseTimerRef.current);
+      }
+    };
+  }, [finalTranscript, append, resetTranscript, language]);
 
   useEffect(() => {
     if (messages.length > 0 && isMessagesLoaded) {
@@ -277,7 +280,7 @@ export default function Playground({ language }: IPlaygroundProps) {
     console.log("activeStream changed:", activeStream);
   }, [activeStream]);
 
-  const handleTTSPlayingStatusChange = (status: boolean) => {
+  const handleTTSPlayingStatusChange = useCallback((status: boolean) => {
     const tts = ttsRef.current;
     if (tts)
       console.log(
@@ -290,11 +293,11 @@ export default function Playground({ language }: IPlaygroundProps) {
     } else if (tts && tts?.getTTSQueueCount() === 0) {
       setActiveStream("user");
     }
-  };
+  }, []);
 
-  const handleTTSOnReadingTextChange = (text: string) => {
+  const handleTTSOnReadingTextChange = useCallback((text: string) => {
     setCurrentlyPlayingTTSText(text.trim());
-  };
+  }, []);
 
   const isTabActive = useTabActive();
 

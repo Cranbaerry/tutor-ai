@@ -451,7 +451,8 @@ export default function PertanyaanUmumSection() {
           render={() => (
             <FormItem className="mb-2">
               <FormLabel>
-                Hal apa yang Anda kurang sukai dari AI chatbot?
+                Hal apa yang Anda harapkan dari sebuah AI chatbot untuk asisten
+                belajar?
               </FormLabel>
 
               {question9.map((item) => (

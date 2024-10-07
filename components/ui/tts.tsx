@@ -110,6 +110,7 @@ const TTS = forwardRef((props: TTSProps, ref) => {
     text: string,
     language: string,
   ): Promise<ReadableStream<Uint8Array> | null> => {
+    console.log("fetchAudio:", text);
     const response = await fetch("/api/tts", {
       method: "POST",
       headers: {
