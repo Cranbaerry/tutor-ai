@@ -13,17 +13,17 @@ export const agreements = [
   {
     id: "agreement-1",
     label:
-      "Memberikan informasi data diri, jenjang pendidikan, dan informasi lainnya yang diperlukan peneliti secara jujur. Pihak BEEXPERT berjanji untuk menjaga kerahasiaan identitas pengguna.",
+      "Honestly provide personal information, educational background, and any other information required by the researcher. BEEXPERT is committed to maintaining the confidentiality of user identities.",
   },
   {
     id: "agreement-2",
     label:
-      "Menjawab pertanyaan-pertanyaan yang diajukan dengan serius dan sesuai dengan pengalaman pengguna.",
+      "Addressing the questions posed seriously and in accordance with user experience.",
   },
   {
     id: "agreement-3",
     label:
-      "Mengerjakan soal yang dijadikan sebagai bahan uji coba dengan sungguh-sungguh dan memanfaatkan bantuan chatbot BEEXPERT dengan bijak.",
+      "Thoroughly work on the practice questions and utilize the BEEXPERT chatbot wisely.",
   },
 ];
 
@@ -31,10 +31,9 @@ export default function PersetujuanSection() {
   const form = useFormContext();
   return (
     <div>
-      <AlertDialogTitle className="mb-2">Persetujuan</AlertDialogTitle>
+      <AlertDialogTitle className="mb-2">Agreements</AlertDialogTitle>
       <p className="mb-2">
-        Dengan mengikuti kegiatan uji coba pengembangan aplikasi BEEXPERT, saya
-        setuju untuk:
+        By participating in the BEEXPERT application development testing, I agree to:
       </p>
 
       <FormField

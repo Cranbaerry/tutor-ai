@@ -38,10 +38,10 @@ export default function DataDiriSection() {
 
   return (
     <>
-      <AlertDialogTitle className="mb-2">Data Diri</AlertDialogTitle>
+      <AlertDialogTitle className="mb-2">Personal Information</AlertDialogTitle>
       <ScrollArea className="!mb-2 h-[calc(100vh-10rem)] sm:h-96 px-1">
         <p className="mb-2">
-          Mohon isi data diri Anda dengan lengkap dan benar.
+          Kindly fill in your personal details completely and correctly.
         </p>
 
         {/* Full Name */}
@@ -51,16 +51,11 @@ export default function DataDiriSection() {
           render={({ field }) => {
             return (
               <FormItem className="mb-2">
-                <FormLabel>Nama Lengkap</FormLabel>
+                <FormLabel>Full name</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="John Doe"
                     {...field}
-                    value={field.value || ""}
-                    onChange={(e) => {
-                      field.onChange(e.target.value);
-                      form.trigger("fullName");
-                    }}
                     required
                   />
                 </FormControl>
@@ -77,7 +72,7 @@ export default function DataDiriSection() {
           render={({ field }) => {
             return (
               <FormItem className="mb-2">
-                <FormLabel>Nomor WhatsApp (opsional)</FormLabel>
+                <FormLabel>Whatsapp number (optional)</FormLabel>
                 <FormControl>
                   <Input placeholder="081234567890" {...field} />
                 </FormControl>
@@ -94,7 +89,7 @@ export default function DataDiriSection() {
           render={({ field }) => {
             return (
               <FormItem className="mb-2 space-y-3">
-                <FormLabel>Jenis Kelamin</FormLabel>
+                <FormLabel>Gender</FormLabel>
                 <FormControl>
                   <RadioGroup
                     onValueChange={(value) => {
@@ -106,15 +101,15 @@ export default function DataDiriSection() {
                   >
                     <FormItem className="flex items-center space-x-3 space-y-0">
                       <FormControl>
-                        <RadioGroupItem value="laki-laki" />
+                        <RadioGroupItem value="male" />
                       </FormControl>
-                      <FormLabel className="font-normal">Laki-laki</FormLabel>
+                      <FormLabel className="font-normal">Male</FormLabel>
                     </FormItem>
                     <FormItem className="flex items-center space-x-3 space-y-0 ml-10">
                       <FormControl>
-                        <RadioGroupItem value="perempuan" />
+                        <RadioGroupItem value="female" />
                       </FormControl>
-                      <FormLabel className="font-normal">Perempuan</FormLabel>
+                      <FormLabel className="font-normal">Female</FormLabel>
                     </FormItem>
                   </RadioGroup>
                 </FormControl>
@@ -131,7 +126,7 @@ export default function DataDiriSection() {
           render={({ field }) => {
             return (
               <FormItem className="mb-2">
-                <FormLabel>Profesi</FormLabel>
+                <FormLabel>Profession</FormLabel>
                 <Select
                   onValueChange={(value) => {
                     field.onChange(value);
@@ -141,13 +136,13 @@ export default function DataDiriSection() {
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Pilih salah satu profesi" />
+                      <SelectValue placeholder="Select one profession." />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="student">Pelajar</SelectItem>
+                    <SelectItem value="student">Student</SelectItem>
                     <SelectItem value="teacher">
-                      Pendidik (Guru, Dosen, dll)
+                      Teacher
                     </SelectItem>
                   </SelectContent>
                 </Select>
@@ -164,7 +159,7 @@ export default function DataDiriSection() {
           render={({ field }) => {
             return (
               <FormItem className="mb-2">
-                <FormLabel>Jenjang Pendidikan</FormLabel>
+                <FormLabel>Educational level</FormLabel>
                 <Select
                   onValueChange={(value) => {
                     field.onChange(value);
@@ -174,27 +169,27 @@ export default function DataDiriSection() {
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Pilih salah satu jenjang pendidikan" />
+                      <SelectValue placeholder="Select one educational level" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="elementary_school">
-                      Sekolah Dasar (SD)
+                      Elementary school
                     </SelectItem>
                     <SelectItem value="junior_high_school">
-                      Sekolah Menengah Pertama (SMP)
+                      Junior high school
                     </SelectItem>
                     <SelectItem value="high_school">
-                      Sekolah Menengah Atas (SMA)
+                      High school
                     </SelectItem>
                     <SelectItem value="bachelor">
-                      Strata 1 (S1) - Sarjana
+                      Bachelor degree
                     </SelectItem>
                     <SelectItem value="master">
-                      Strata 2 (S2) - Magister
+                      Master degree
                     </SelectItem>
                     <SelectItem value="doctoral">
-                      Strata 3 (S3) - Doktoral
+                      Doctoral degree
                     </SelectItem>
                   </SelectContent>
                 </Select>
@@ -211,7 +206,7 @@ export default function DataDiriSection() {
           render={({ field }) => {
             return (
               <FormItem className="mb-2">
-                <FormLabel>Asal Sekolah/Institusi</FormLabel>
+                <FormLabel>School/institution</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="SMA xxx"

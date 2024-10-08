@@ -71,14 +71,14 @@ export default function PostTest() {
       imageUrl: imageUrl,
     };
     insert(values);
-    toast.success("Success", { description: "Data berhasil disimpan!" });
+    toast.success("Success", { description: "Data has been saved successfully." });
     setSubmitted(true);
     setLoading(false);
   };
 
   const handleNext = () => {
     setLoading(true);
-    router.push("/evaluasi");
+    router.push("/evaluation");
     setLoading(false);
   };
 

@@ -86,8 +86,8 @@ function DialogFinalAnswer({ canvasRef }: IDialogFinalAnswerProps) {
       return;
     }
     insert({ ...values, imageUrl: imageUrl });
-    toast.success("Success", { description: "Data berhasil disimpan!" });
-    router.push("/evaluasi");
+    toast.success("Success", { description: "Data has been saved successfully." });
+    router.push("/evaluation");
     setLoading(false);
   }
 

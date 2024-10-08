@@ -72,7 +72,7 @@ export function MainNav({
           className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary flex items-center space-x-4"
         >
           <ExitIcon className="h-4 w-4 mr-2" />
-          Keluar
+          Logout
         </button>
       </form>
 

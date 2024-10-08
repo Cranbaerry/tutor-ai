@@ -16,73 +16,73 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 export const question5 = [
   {
     id: "question5-1",
-    label: "Membantu memberikan solusi terhadap suatu pertanyaan.",
+    label: "Assists in providing solutions to a problem.",
   },
   {
     id: "question5-2",
-    label: "Menjelaskan konsep-konsep yang kurang dipahami.",
+    label: "Explaining concepts that students find challenging.",
   },
   {
     id: "question5-3",
-    label: "Memberikan ide dan masukan.",
+    label: "Providing ideas and suggestions.",
   },
   {
     id: "question5-4",
-    label: "Membantu mengerjakan tugas.",
+    label: "Assisting with assignments.",
   },
   {
     id: "question5-5",
-    label: "Menyusun materi presentasi atau pengajaran.",
+    label: "Arranging presentation or teaching materials.",
   },
   {
     id: "question5-6",
-    label: "Membuat materi dan latihan soal.",
+    label: "Creating materials and practice questions.",
   },
   {
     id: "question5-7",
-    label: "Lainnya.",
+    label: "Others.",
   },
 ];
 
 export const question6 = [
   {
     id: "question6-1",
-    label: "Pemberian jawaban yang cukup akurat.",
+    label: "Providing a sufficiently accurate answer.",
   },
   {
     id: "question6-2",
-    label: "Pemberian jawaban yang instan.",
+    label: "Instant response.",
   },
   {
     id: "question6-3",
-    label: "Dapat memahami input gambar dan teks dengan baik.",
+    label: "Can accurately understand both image and text inputs.",
   },
   {
     id: "question6-4",
-    label: "Lainnya.",
+    label: "Others.",
   },
 ];
 
 export const question7 = [
   {
     id: "question7-1",
-    label: "Jawaban yang kadang ambigu.",
+    label: "Answers that can be a bit ambiguous sometimes.",
   },
   {
     id: "question7-2",
-    label: "Jawaban yang kurang detail.",
+    label: "Insufficiently detailed answer.",
   },
   {
     id: "question7-3",
-    label: "Jawaban yang keliru.",
+    label: "An erroneous response.",
   },
   {
     id: "question7-4",
-    label: "Keterbatasan dalam berinteraksi.",
+    label: "Limitations in interaction.",
   },
   {
     id: "question7-5",
-    label: "Lainnya.",
+    label: "Others.",
   },
 ];
 
@@ -90,26 +90,26 @@ export const question9 = [
   {
     id: "question9-1",
     label:
-      "Chatbot yang didesain untuk lebih berfokus pada pemberian stimulus dibandingkan jawaban secara eksplisit.",
+      "A chatbot designed to prioritize providing stimuli over explicit answers.",
   },
   {
     id: "question9-2",
     label:
-      "Chatbot yang dapat memahami dan menyesuakan responsnya sesuai dengan tujuan pembelajaran yang ditetapkan.",
+      "A chatbot capable of understanding and adapting its responses according to the specified learning objectives.",
   },
   {
     id: "question9-3",
     label:
-      "Chatbot yang dapat berinteraksi secara aktif, seperti melalui suara dan coretan.",
+      "A chatbot enabling active interactions, including voice and sketching functionalities.",
   },
   {
     id: "question9-4",
     label:
-      "Chatbot yang dapat secara otomatis menguji pemahaman siswa, seperti dengan memberikan pop quiz.",
+      "A chatbot capable of automatically assessing student comprehension, such as by administering pop quizzes.",
   },
   {
     id: "question9-5",
-    label: "Lainnya.",
+    label: "Others.",
   },
 ];
 
@@ -117,10 +117,10 @@ export default function PertanyaanUmumSection() {
   const form = useFormContext();
   return (
     <>
-      <AlertDialogTitle className="mb-2">Pertanyaan Umum</AlertDialogTitle>
+      <AlertDialogTitle className="mb-2">User&apos;s Characteristic Questions</AlertDialogTitle>
       <ScrollArea className="!mb-2 h-[calc(100vh-10rem)] sm:h-96 px-1">
         <p className="mb-2">
-          Jawab pertanyaan-pertanyaan berikut dengan benar.
+          Please respond to the following questions truthfully and correctly.
         </p>
 
         <FormField
@@ -129,7 +129,7 @@ export default function PertanyaanUmumSection() {
           render={({ field }) => (
             <FormItem className="mb-2">
               <FormLabel>
-                Apakah Anda pernah mempelajari Trigonometri Matematika SMA?
+                Have you ever studied high school trigonometry?
               </FormLabel>
               <FormControl>
                 <RadioGroup
@@ -139,15 +139,15 @@ export default function PertanyaanUmumSection() {
                 >
                   <FormItem className="flex items-center space-x-3 space-y-0">
                     <FormControl>
-                      <RadioGroupItem value="pernah" />
+                      <RadioGroupItem value="yes" />
                     </FormControl>
-                    <FormLabel className="font-normal">Pernah</FormLabel>
+                    <FormLabel className="font-normal">Yes</FormLabel>
                   </FormItem>
                   <FormItem className="flex items-center space-x-3 space-y-0 ml-10">
                     <FormControl>
-                      <RadioGroupItem value="tidak_pernah" />
+                      <RadioGroupItem value="no" />
                     </FormControl>
-                    <FormLabel className="font-normal">Tidak pernah</FormLabel>
+                    <FormLabel className="font-normal">No</FormLabel>
                   </FormItem>
                 </RadioGroup>
               </FormControl>
@@ -162,7 +162,7 @@ export default function PertanyaanUmumSection() {
           render={({ field }) => (
             <FormItem className="mb-2">
               <FormLabel>
-                Seberapa paham Anda dengan materi Trigonometri?
+                How well do you understand the topic of Trigonometry?
               </FormLabel>
               <FormControl>
                 <RadioGroup
@@ -172,27 +172,27 @@ export default function PertanyaanUmumSection() {
                 >
                   <FormItem className="flex items-center space-x-3 space-y-0">
                     <FormControl>
-                      <RadioGroupItem value="tidak_paham" />
+                      <RadioGroupItem value="lack_understanding" />
                     </FormControl>
-                    <FormLabel className="font-normal">Tidak paham</FormLabel>
+                    <FormLabel className="font-normal">Lack</FormLabel>
                   </FormItem>
                   <FormItem className="flex items-center space-x-3 space-y-0 ml-10">
                     <FormControl>
-                      <RadioGroupItem value="sedikit_paham" />
+                      <RadioGroupItem value="limited_understanding" />
                     </FormControl>
-                    <FormLabel className="font-normal">Sedikit paham</FormLabel>
+                    <FormLabel className="font-normal">Limited</FormLabel>
                   </FormItem>
                   <FormItem className="flex items-center space-x-3 space-y-0 ml-10">
                     <FormControl>
-                      <RadioGroupItem value="cukup_paham" />
+                      <RadioGroupItem value="moderate_understanding" />
                     </FormControl>
-                    <FormLabel className="font-normal">Cukup paham</FormLabel>
+                    <FormLabel className="font-normal">Moderate</FormLabel>
                   </FormItem>
                   <FormItem className="flex items-center space-x-3 space-y-0 ml-10">
                     <FormControl>
-                      <RadioGroupItem value="sangat_paham" />
+                      <RadioGroupItem value="extensive_understanding" />
                     </FormControl>
-                    <FormLabel className="font-normal">Sangat paham</FormLabel>
+                    <FormLabel className="font-normal">Extensive</FormLabel>
                   </FormItem>
                 </RadioGroup>
               </FormControl>
@@ -207,8 +207,7 @@ export default function PertanyaanUmumSection() {
           render={({ field }) => (
             <FormItem className="mb-2">
               <FormLabel>
-                Apakah Anda pernah menggunakan chatbot (ChatGPT, Gemini, dll.)
-                untuk keperluan akademik?
+                Have you ever used a chatbot (such as ChatGPT, Gemini, etc.) for academic purposes?
               </FormLabel>
               <FormControl>
                 <RadioGroup
@@ -218,15 +217,15 @@ export default function PertanyaanUmumSection() {
                 >
                   <FormItem className="flex items-center space-x-3 space-y-0">
                     <FormControl>
-                      <RadioGroupItem value="pernah" />
+                      <RadioGroupItem value="yes" />
                     </FormControl>
-                    <FormLabel className="font-normal">Pernah</FormLabel>
+                    <FormLabel className="font-normal">Yes</FormLabel>
                   </FormItem>
                   <FormItem className="flex items-center space-x-3 space-y-0 ml-10">
                     <FormControl>
-                      <RadioGroupItem value="tidak_pernah" />
+                      <RadioGroupItem value="no" />
                     </FormControl>
-                    <FormLabel className="font-normal">Tidak pernah</FormLabel>
+                    <FormLabel className="font-normal">No</FormLabel>
                   </FormItem>
                 </RadioGroup>
               </FormControl>
@@ -241,8 +240,7 @@ export default function PertanyaanUmumSection() {
           render={({ field }) => (
             <FormItem className="mb-2">
               <FormLabel>
-                Apakah kehadiran AI chatbot mempercepat proses pemahaman Anda
-                terhadap suatu konsep?
+                Does the presence of AI chatbots accelerate your understanding of a concept?
               </FormLabel>
               <FormControl>
                 <RadioGroup
@@ -252,15 +250,15 @@ export default function PertanyaanUmumSection() {
                 >
                   <FormItem className="flex items-center space-x-3 space-y-0">
                     <FormControl>
-                      <RadioGroupItem value="ya" />
+                      <RadioGroupItem value="yes" />
                     </FormControl>
-                    <FormLabel className="font-normal">Ya</FormLabel>
+                    <FormLabel className="font-normal">Yes</FormLabel>
                   </FormItem>
                   <FormItem className="flex items-center space-x-3 space-y-0 ml-10">
                     <FormControl>
-                      <RadioGroupItem value="tidak" />
+                      <RadioGroupItem value="no" />
                     </FormControl>
-                    <FormLabel className="font-normal">Tidak</FormLabel>
+                    <FormLabel className="font-normal">No</FormLabel>
                   </FormItem>
                 </RadioGroup>
               </FormControl>
@@ -274,7 +272,7 @@ export default function PertanyaanUmumSection() {
           name="question5"
           render={() => (
             <FormItem className="mb-2">
-              <FormLabel>Apa tujuan Anda menggunakan chatbot?</FormLabel>
+              <FormLabel>What is your objective for using a chatbot?</FormLabel>
               {question5.map((item) => (
                 <FormField
                   key={item.id}
@@ -319,7 +317,7 @@ export default function PertanyaanUmumSection() {
           render={() => (
             <FormItem className="mb-2">
               <FormLabel>
-                Apa fitur AI chatbot yang paling Anda sukai?
+                What&apos;s your favorite thing about AI chatbots?
               </FormLabel>
               {question6.map((item) => (
                 <FormField
@@ -365,7 +363,7 @@ export default function PertanyaanUmumSection() {
           render={() => (
             <FormItem className="mb-2">
               <FormLabel>
-                Hal apa yang Anda kurang sukai dari AI chatbot?
+                What do you dislike about AI chatbots?
               </FormLabel>
               {question7.map((item) => (
                 <FormField
@@ -411,8 +409,7 @@ export default function PertanyaanUmumSection() {
           render={({ field }) => (
             <FormItem className="mb-2">
               <FormLabel>
-                Apakah Anda setuju bila ChatGPT digunakan sebagai asisten
-                belajar siswa?
+                Do you agree that ChatGPT can be used as a student learning assistant?
               </FormLabel>
               <FormControl>
                 <RadioGroup
@@ -422,21 +419,21 @@ export default function PertanyaanUmumSection() {
                 >
                   <FormItem className="flex items-center space-x-3 space-y-0">
                     <FormControl>
-                      <RadioGroupItem value="setuju" />
+                      <RadioGroupItem value="agree" />
                     </FormControl>
-                    <FormLabel className="font-normal">Setuju</FormLabel>
+                    <FormLabel className="font-normal">Agree</FormLabel>
                   </FormItem>
                   <FormItem className="flex items-center space-x-3 space-y-0 ml-10">
                     <FormControl>
-                      <RadioGroupItem value="mungkin" />
+                      <RadioGroupItem value="maybe" />
                     </FormControl>
-                    <FormLabel className="font-normal">Mungkin</FormLabel>
+                    <FormLabel className="font-normal">Maybe</FormLabel>
                   </FormItem>
                   <FormItem className="flex items-center space-x-3 space-y-0 ml-10">
                     <FormControl>
-                      <RadioGroupItem value="tidak_setuju" />
+                      <RadioGroupItem value="disagree" />
                     </FormControl>
-                    <FormLabel className="font-normal">Tidak setuju</FormLabel>
+                    <FormLabel className="font-normal">Disagree</FormLabel>
                   </FormItem>
                 </RadioGroup>
               </FormControl>
@@ -451,8 +448,7 @@ export default function PertanyaanUmumSection() {
           render={() => (
             <FormItem className="mb-2">
               <FormLabel>
-                Hal apa yang Anda harapkan dari sebuah AI chatbot untuk asisten
-                belajar?
+                What specific features or capabilities do you hope an AI chatbot would have as a learning assistant?
               </FormLabel>
 
               {question9.map((item) => (

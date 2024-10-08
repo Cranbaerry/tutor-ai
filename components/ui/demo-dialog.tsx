@@ -20,7 +20,7 @@ function DialogDemo() {
         <DialogHeader>
           <DialogTitle>Demo Video</DialogTitle>
           <DialogDescription>
-            Saksikan video berikut untuk melihat contoh penggunaan BEEXPERT.
+            Check out this video to see how BEEXPERT is used.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -37,7 +37,7 @@ function DialogDemo() {
         </div>
         <DialogFooter>
           <Button>
-            <DialogClose>Selesai</DialogClose>
+            <DialogClose>Finish</DialogClose>
           </Button>
         </DialogFooter>
       </DialogContent>

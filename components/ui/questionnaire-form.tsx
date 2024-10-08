@@ -26,48 +26,48 @@ export const formSchema = z.object({
   agreements: z
     .array(z.string())
     .refine((value) => value.length === agreements.length, {
-      message: "Silahkan setujui semua persetujuan yang diberikan.",
+      message: "Please agree to all the given terms and conditions.",
     }),
-  fullName: z.string().min(1, { message: "Nama lengkap harus diisi." }),
+  fullName: z.string().min(1, { message: "Please enter your full name." }),
   whatsappNumber: z.string().optional(),
-  gender: z.enum(["laki-laki", "perempuan"], {
-    required_error: "Pilih salah satu opsi jenis kelamin",
+  gender: z.enum(["male", "female"], {
+    required_error: "Please select your gender.",
   }),
-  profession: z.string().min(1, { message: "Pilih salah satu opsi profesi." }),
+  profession: z.string().min(1, { message: "Choose a profession from the available options." }),
   educationLevel: z
     .string()
-    .min(1, { message: "Pilih salah satu opsi jenjang pendidikan." }),
-  school: z.string().min(1, { message: "Asal sekolah/institusi harus diisi." }),
+    .min(1, { message: "Select one of the educational level options." }),
+  school: z.string().min(1, { message: "Please fill in the school/institution." }),
 
-  question1: z.enum(["pernah", "tidak_pernah"], {
-    required_error: "Pilih salah satu opsi.",
+  question1: z.enum(["yes", "no"], {
+    required_error: "Please select one option.",
   }),
   question2: z.enum(
-    ["tidak_paham", "sedikit_paham", "cukup_paham", "sangat_paham"],
+    ["lack_understanding", "limited_understanding", "moderate_understanding", "extensive_understanding"],
     {
-      required_error: "Pilih salah satu opsi.",
+      required_error: "Please select one option.",
     },
   ),
-  question3: z.enum(["pernah", "tidak_pernah"], {
-    required_error: "Pilih salah satu opsi.",
+  question3: z.enum(["yes", "no"], {
+    required_error: "Please select one option.",
   }),
-  question4: z.enum(["ya", "tidak"], {
-    required_error: "Pilih salah satu opsi.",
+  question4: z.enum(["yes", "no"], {
+    required_error: "Please select one option.",
   }),
   question5: z.array(z.string()).refine((value) => value.some((item) => item), {
-    message: "Pilih setidaknya satu dari opsi-opsi di atas.",
+    message: "Please select at least one of the options above.",
   }),
   question6: z.array(z.string()).refine((value) => value.some((item) => item), {
-    message: "Pilih setidaknya satu dari opsi-opsi di atas.",
+    message: "Please select at least one of the options above.",
   }),
   question7: z.array(z.string()).refine((value) => value.some((item) => item), {
-    message: "Pilih setidaknya satu dari opsi-opsi di atas.",
+    message: "Please select at least one of the options above.",
   }),
-  question8: z.enum(["setuju", "mungkin", "tidak_setuju"], {
-    required_error: "Pilih salah satu opsi.",
+  question8: z.enum(["agree", "maybe", "disagree"], {
+    required_error: "Please select one option.",
   }),
   question9: z.array(z.string()).refine((value) => value.some((item) => item), {
-    message: "Pilih setidaknya satu dari opsi-opsi di atas.",
+    message: "Please select at least one of the options above.",
   }),
 });
 
@@ -113,7 +113,7 @@ export default function QuestionnaireForm() {
     }
 
     toast.info(
-      "Terima kasih telah mengisi kuisioner ini. Data Anda telah tersimpan.",
+      "Thank you for completing this questionnaire. Your data has been saved.",
     );
     setIsOpen(false);
     setIsLoading(false);
@@ -153,7 +153,7 @@ export default function QuestionnaireForm() {
         break;
     }
 
-    toast.error("Silahkan isi semua field yang wajib diisi.");
+    toast.error("Please fill in all required fields.");
   };
 
   const handlePrevious = () => {

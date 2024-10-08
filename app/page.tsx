@@ -29,14 +29,12 @@ async function AuthenticationPage({
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
             <p className="text-base">
-              Platform bimbingan belajar berbasis AI yang dirancang untuk siswa
-              SMA yang memungkinkan siswa untuk memasukkan pertanyaan melalui
-              suara dan gambar secara langsung.
+            An AI-based tutoring platform designed for high school students that allows them to ask questions directly through voice and images.
             </p>
             <footer className="text-xs italic">
-              Bagian dari penelitian &ldquo;Chatbot System with Retrieval
+              Part of &ldquo;Chatbot System with Retrieval
               Augmented Generation for Enhanced Self-learning Experience&rdquo;
-              oleh{" "}
+              research by{" "}
               <a
                 href="https://www.linkedin.com/in/angeline-mary-marchella/"
                 target="_blank"

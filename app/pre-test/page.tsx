@@ -71,7 +71,7 @@ export default function PreTest() {
       imageUrl: imageUrl,
     };
     insert(values);
-    toast.success("Success", { description: "Data berhasil disimpan!" });
+    toast.success("Success", { description: "Data has been saved successfully." });
     setSubmitted(true);
     setLoading(false);
   };

@@ -135,7 +135,7 @@ function AuthPageContent({ isAuthCodeError }: { isAuthCodeError: boolean }) {
             "absolute right-4 top-4 md:right-8 md:top-8",
           )}
         >
-          {formMode === "SignUp" ? "Masuk" : "Daftar"}
+          {formMode === "SignUp" ? "Login" : "Sign Up"}
         </Link>
         <>
           <div className="flex flex-col items-center justify-center space-y-2">
@@ -158,13 +158,13 @@ function AuthPageContent({ isAuthCodeError }: { isAuthCodeError: boolean }) {
           <div className="flex flex-col space-y-2 text-center">
             <h1 className="text-2xl font-semibold tracking-tight">
               {currentFormMode === "SignUp"
-                ? "Buat akun baru"
-                : "Login dengan email"}
+                ? "Create a new account"
+                : "Login with email"}
             </h1>
             <p className="text-sm text-muted-foreground">
               {currentFormMode === "SignUp"
-                ? "Masukkan email untuk membuat akun"
-                : "Masukkan kredential untuk melanjutkan"}
+                ? "Enter your email to create an account"
+                : "Enter your credential to continue"}
             </p>
           </div>
 
@@ -197,7 +197,7 @@ function AuthPageContent({ isAuthCodeError }: { isAuthCodeError: boolean }) {
                   <Input
                     id="password"
                     name="password"
-                    placeholder="Kata Sandi"
+                    placeholder="Password"
                     type="password"
                     autoCapitalize="none"
                     autoComplete="password"
@@ -209,7 +209,7 @@ function AuthPageContent({ isAuthCodeError }: { isAuthCodeError: boolean }) {
                   {isLoading && (
                     <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
                   )}
-                  {currentFormMode === "SignUp" ? "Daftar" : "Masuk"}
+                  {currentFormMode === "SignUp" ? "Sign Up" : "Login"}
                 </Button>
               </div>
             </form>
@@ -220,7 +220,7 @@ function AuthPageContent({ isAuthCodeError }: { isAuthCodeError: boolean }) {
               </div>
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-background px-2 text-muted-foreground">
-                  Atau masuk dengan
+                  {currentFormMode === "SignUp" ? "Or sign up with" : "Or login with"}
                 </span>
               </div>
             </div>
@@ -241,14 +241,14 @@ function AuthPageContent({ isAuthCodeError }: { isAuthCodeError: boolean }) {
           </div>
         </>
         <p className="px-8 text-center text-sm text-muted-foreground">
-          Dengan memakai platform ini, anda setuju{" "}
+          By using this platform, you agree with the {" "}
           <Link
             href="#"
             className="underline underline-offset-4 hover:text-primary"
           >
             Terms of Service
           </Link>{" "}
-          dan{" "}
+          and{" "}
           <Link
             href="#"
             className="underline underline-offset-4 hover:text-primary"

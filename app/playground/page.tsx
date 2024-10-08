@@ -30,8 +30,7 @@ export default function Main() {
       {
         content: (
           <span className="text-sm">
-            Jangan lupa nyalakan microphone dan pakai earphone/headset supaya
-            interaksimu dengan BEEXPERT lebih lancar.
+            Please don&apos;t forget to turn on your microphone and use earphones/headsets for a smoother interaction with BEEXPERT.
           </span>
         ),
         locale: { skip: <strong aria-label="skip">Skip</strong> },
@@ -39,25 +38,24 @@ export default function Main() {
         target: "body",
         title: (
           <h2 className="font-bold">
-            Yuk, kenalan dengan fitur-fitur di BEEXPERT!
+            Let&apos;s explore the features available on BEEXPERT!
           </h2>
         ),
       },
       {
         content: (
           <span className="text-sm">
-            Kamu bisa mengubah bahasa komunikasi dengan BEEXPERT ke Bahasa
-            Inggris dengan menekan tombol berikut.
+            You can switch the communication language with BEEXPERT to English by pressing the following button.
           </span>
         ),
         placement: "bottom",
         target: ".switch__lang",
-        title: <h2 className="font-bold">Ganti Bahasa</h2>,
+        title: <h2 className="font-bold">Change Language</h2>,
       },
       {
         content: (
           <span className="text-sm">
-            Saksikan video demo singkat untuk memahami cara penggunaan BEEXPERT.
+            View a brief video demonstration to learn how BEEXPERT works.
           </span>
         ),
         placement: "bottom",
@@ -67,10 +65,10 @@ export default function Main() {
           },
         },
         target: ".demo__project",
-        title: <h2 className="font-bold">Video Demo</h2>,
+        title: <h2 className="font-bold">Demo Video</h2>,
       },
       {
-        content: <span className="text-sm">Atur posisi canvas sesukamu!</span>,
+        content: <span className="text-sm">Position the canvas just the way you like it!</span>,
         placement: "right",
         styles: {
           options: {
@@ -83,7 +81,7 @@ export default function Main() {
       {
         content: (
           <span className="text-sm">
-            Tulis cara penyelesaian soal dengan pensil.
+            Show your work for the problem using this pencil.
           </span>
         ),
         placement: "right",
@@ -98,7 +96,7 @@ export default function Main() {
       {
         content: (
           <span className="text-sm">
-            Gunakan penghapus untuk mengoreksi coretanmu.
+            Use the eraser to correct your scribbles.
           </span>
         ),
         placement: "right",
@@ -113,7 +111,7 @@ export default function Main() {
       {
         content: (
           <span className="text-sm">
-            Kamu bebas memilih warna pensil favoritmu.
+            You have the freedom to select your preferred pencil color.
           </span>
         ),
         placement: "right",
@@ -128,7 +126,7 @@ export default function Main() {
       {
         content: (
           <span className="text-sm">
-            Kamu bisa bebas atur ketebalan pensilmu.
+            You can customize the pencil thickness as you desire.
           </span>
         ),
         placement: "right",
@@ -143,7 +141,7 @@ export default function Main() {
       {
         content: (
           <span className="text-sm">
-            Kembalikan coretanmu satu langkah sebelum.
+            Revert your drawing one step back.
           </span>
         ),
         placement: "right",
@@ -158,7 +156,7 @@ export default function Main() {
       {
         content: (
           <span className="text-sm">
-            Kembalikan coretanmu satu langkah setelah.
+            Revert your drawing one step after.
           </span>
         ),
         placement: "right",
@@ -173,7 +171,7 @@ export default function Main() {
       {
         content: (
           <span className="text-sm">
-            Klik opsi berikut untuk memperbesar canvas.
+            Select the following option to enlarge the canvas.
           </span>
         ),
         placement: "right",
@@ -188,7 +186,7 @@ export default function Main() {
       {
         content: (
           <span className="text-sm">
-            Klik opsi berikut untuk memperkecil canvas.
+            Select the following option to decrease the canvas dimensions.
           </span>
         ),
         placement: "right",
@@ -203,7 +201,7 @@ export default function Main() {
       {
         content: (
           <span className="text-sm">
-            Klik toggle berikut untuk mute/unmute mikrofon kamu.
+            Click the following toggle to mute/unmute your microphone.
           </span>
         ),
         placement: "top",
@@ -218,7 +216,7 @@ export default function Main() {
       {
         content: (
           <span className="text-sm">
-            Klik toggle berikut untuk melihat histori chat kamu dengan BEEXPERT.
+            Click the following toggle to view your chat history with BEEXPERT.
           </span>
         ),
         placement: "top",
@@ -233,8 +231,7 @@ export default function Main() {
       {
         content: (
           <span className="text-sm">
-            Kamu bisa mulai berinteraksi dengan menyapa BEEXPERT terlebih
-            dahulu.
+            Just say hi to BEEXPERT to get started!
           </span>
         ),
         locale: {
@@ -243,7 +240,7 @@ export default function Main() {
         },
         placement: "center",
         target: "body",
-        title: <h2 className="font-bold">Siap Belajar</h2>,
+        title: <h2 className="font-bold">You&apos;re Ready to Learn</h2>,
       },
     ],
   });
