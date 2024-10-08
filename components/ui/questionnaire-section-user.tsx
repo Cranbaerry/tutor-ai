@@ -56,7 +56,6 @@ export default function DataDiriSection() {
                   <Input
                     placeholder="John Doe"
                     {...field}
-                    value={field.value || ""}
                     onChange={(e) => {
                       field.onChange(e.target.value);
                       form.trigger("fullName");
