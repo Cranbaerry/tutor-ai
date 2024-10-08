@@ -30,11 +30,10 @@ export default function DataDiriSection() {
       const user = await getUserData();
       if (user != null) {
         form.setValue("fullName", user.user_metadata.full_name ?? "");
-        form.setValue("email", user.email ?? "");
       }
     };
     fetchData();
-  }, [form]);
+  }, []);
 
   return (
     <>
@@ -56,6 +55,9 @@ export default function DataDiriSection() {
                   <Input
                     placeholder="John Doe"
                     {...field}
+                    onChange={(e) => {
+                      field.onChange(e.target.value);
+                    }}
                     required
                   />
                 </FormControl>
@@ -94,7 +96,6 @@ export default function DataDiriSection() {
                   <RadioGroup
                     onValueChange={(value) => {
                       field.onChange(value);
-                      form.trigger("gender");
                     }}
                     defaultValue={field.value}
                     className="flex flex-row space-y-1"
@@ -130,7 +131,6 @@ export default function DataDiriSection() {
                 <Select
                   onValueChange={(value) => {
                     field.onChange(value);
-                    form.trigger("profession");
                   }}
                   defaultValue={field.value}
                 >
@@ -163,7 +163,6 @@ export default function DataDiriSection() {
                 <Select
                   onValueChange={(value) => {
                     field.onChange(value);
-                    form.trigger("educationLevel");
                   }}
                   defaultValue={field.value}
                 >
@@ -213,7 +212,6 @@ export default function DataDiriSection() {
                     {...field}
                     onChange={(e) => {
                       field.onChange(e.target.value);
-                      form.trigger("school");
                     }}
                   />
                 </FormControl>
